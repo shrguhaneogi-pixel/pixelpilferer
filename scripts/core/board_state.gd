@@ -1,23 +1,31 @@
 class_name BoardState extends RefCounted
 
+## Pure, deterministic data representation of a puzzle board state.
+
 const TileType = Constants.TileType
 const BlockColor = Constants.BlockColor
 
 var grid_size: Vector2i = Vector2i(10, 10)
-# Base tiles: Map from Vector2i to TileType
+
+# Immutable base terrain layer: Vector2i -> TileType (FLOOR, VOID, WALL)
 var tiles: Dictionary = {}
-# Sockets: Map from Vector2i to BlockColor required
+
+# Sockets layer: Vector2i -> BlockColor
 var sockets: Dictionary = {}
-# Blocks: Map from Vector2i to { id: int, color: int, is_bridge: bool }
+
+# Dynamic movable blocks layer: Vector2i -> { "id": int, "color": int, "is_bridge": bool }
 var blocks: Dictionary = {}
-# Exit cell position
+
+# Goal and actor coordinates
 var exit_cell: Vector2i = Vector2i(-1, -1)
-# Player state
 var player_pos: Vector2i = Vector2i(0, 0)
+var initial_player_pos: Vector2i = Vector2i(0, 0)
 var player_facing: Vector2i = Constants.DIR_SOUTH
-# Carried block: Dictionary with keys "id", "color" or empty if none
+
+# Carried block: Dictionary with "id", "color" or empty if carrying nothing
 var carried_block: Dictionary = {}
-# Gameplay metrics
+
+# Turn count and level completion
 var turn_count: int = 0
 var is_completed: bool = false
 
@@ -27,7 +35,7 @@ func duplicate_state() -> BoardState:
 	copy.tiles = tiles.duplicate(true)
 	copy.sockets = sockets.duplicate(true)
 	
-	# Deep copy blocks
+	# Deep copy dynamic blocks
 	copy.blocks = {}
 	for pos: Vector2i in blocks:
 		var b: Dictionary = blocks[pos]
@@ -39,6 +47,7 @@ func duplicate_state() -> BoardState:
 	
 	copy.exit_cell = exit_cell
 	copy.player_pos = player_pos
+	copy.initial_player_pos = initial_player_pos
 	copy.player_facing = player_facing
 	
 	if carried_block.is_empty():
@@ -76,21 +85,18 @@ func is_walkable(pos: Vector2i) -> bool:
 		
 	var tile: int = get_tile(pos)
 	
-	# Immutable wall is never walkable
-	if tile == TileType.WALL:
-		return false
-	if tile == TileType.EMPTY:
+	# Wall or unmapped boundary is never walkable
+	if tile == TileType.WALL or tile == TileType.EMPTY:
 		return false
 		
-	# Void is only walkable if bridged by a block
+	# Void is ONLY walkable if bridged by a block
 	if tile == TileType.VOID:
 		return is_bridge_at(pos)
 		
 	# Floor is walkable ONLY if NOT occupied by an obstacle block
 	if tile == TileType.FLOOR:
 		if has_block_at(pos):
-			# If block is marked bridge (e.g. unexpected), or standard obstacle
-			return blocks[pos].get("is_bridge", false)
+			return is_bridge_at(pos)
 		return true
 		
 	return false
@@ -104,7 +110,7 @@ func is_socket_satisfied(pos: Vector2i) -> bool:
 	var req_color: int = sockets[pos]
 	var block_color: int = blocks[pos]["color"]
 	
-	# Neutral socket accepts any block
+	# Neutral socket accepts any color
 	if req_color == BlockColor.NEUTRAL:
 		return true
 		
@@ -112,6 +118,9 @@ func is_socket_satisfied(pos: Vector2i) -> bool:
 	return req_color == block_color
 
 func is_all_sockets_satisfied() -> bool:
+	# Levels with no sockets trivially satisfy this condition
+	if sockets.is_empty():
+		return true
 	for pos: Vector2i in sockets:
 		if not is_socket_satisfied(pos):
 			return false
@@ -120,8 +129,10 @@ func is_all_sockets_satisfied() -> bool:
 func is_carrying() -> bool:
 	return not carried_block.is_empty()
 
-func get_state_hash() -> String:
-	# Format: P(x,y,face)|C(id,col)|B[(x,y,col,bridge)...]
+## Canonical state identity key for solver visited-state tracking and regression checks.
+## States containing identical block colors at identical positions produce identical keys
+## regardless of internal insertion order. Excludes turn_count and undo history.
+func get_canonical_key() -> String:
 	var parts: Array[String] = []
 	parts.append("P(%d,%d,%d,%d)" % [player_pos.x, player_pos.y, player_facing.x, player_facing.y])
 	
@@ -143,3 +154,6 @@ func get_state_hash() -> String:
 	parts.append("B[" + ",".join(b_parts) + "]")
 	
 	return "|".join(parts)
+
+func get_state_hash() -> String:
+	return get_canonical_key()

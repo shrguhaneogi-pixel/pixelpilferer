@@ -143,9 +143,10 @@ def solve_level(initial_state: BoardState, max_visited: int = 60000) -> Dict[str
             }
 
         for act in CANDIDATE_ACTIONS:
-            ok, next_state, ev, msg = GameRules.apply_action(state, act)
-            if not ok:
+            res = GameRules.apply_action(state, act)
+            if not res["success"]:
                 continue
+            next_state = res["next_state"]
 
             nh = next_state.get_state_hash()
             ng = g + 1

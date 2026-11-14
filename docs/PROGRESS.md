@@ -4,18 +4,18 @@
 
 | Milestone | Scope | Status | Notes |
 | :--- | :--- | :---: | :--- |
-| **Phase 1** | Environment Audit & Project Memory | **COMPLETE** | Audited environment; documented design, architecture, decisions, test plan. |
-| **Phase 2** | Core Domain Engine & Invariants | **COMPLETE** | Pure GDScript state machine, actions, rules, undo stack, A*/BFS solver. |
-| **Phase 3** | 20 Handcrafted Levels & Solvability | **COMPLETE** | All 20 levels designed in JSON & mathematically proven solvable via solver. |
+| **Phase 1** | Foundation & Architecture | **COMPLETE** | Godot 4.7.2 baseline, 640x360 viewport, `gl_compatibility` renderer, TileMapLayers, clean module boundaries. |
+| **Phase 2** | Deterministic Puzzle Engine | **COMPLETE** | 8 canonical actions, structured `ActionResult`, 28 test cases, 500-step property fuzzing, demo corridor, and canonical hashing. |
+| **Phase 3** | 20 Handcrafted Levels & Solvability | **COMPLETE** | All 20 levels designed in JSON & mathematically proven solvable via A* search heuristic. |
 | **Phase 4** | Pixel-Art Assets & Audio Synthesis | **COMPLETE** | 16x16 pixel sprites (Pip, blocks, tileset, sockets, portal, icon) & 6 WAV SFX. |
 | **Phase 5** | Godot View Adapters & Rendering | **COMPLETE** | TileMapLayers, tweens, pixel camera, audio manager, level view. |
-| **Phase 6** | UI, Progression, Settings & Release | **COMPLETE** | Title screen ("Click to Start"), chapter select, HUD, save system, presets. |
+| **Phase 6** | UI, Progression, Settings & Release | **COMPLETE** | Title screen, chapter select, HUD, save system, desktop & web export presets. |
 
 ---
 
 ## 2. 20 Level Solvability Matrix (100% Verified)
 
-| Chapter | Level | ID | Name | Sockets | Blocks | BFS/A* Solved | Min Steps |
+| Chapter | Level | ID | Name | Sockets | Blocks | A* Solved | Min Steps |
 | :---: | :---: | :---: | :--- | :---: | :---: | :---: | :---: |
 | **1** | 1 | `ch1_01` | First Steps | 1 (Neutral) | 1 (Neutral) | **YES** | 13 |
 | **1** | 2 | `ch1_02` | Alley Shortcut | 1 (Neutral) | 1 (Neutral) | **YES** | 7 |
@@ -42,9 +42,9 @@
 
 ## 3. Environment & Tools Verification Record
 
-- **Host OS:** Windows (AMD64)
-- **Godot Binary:** Not found in system PATH.
-- **Python:** Python 3.14 detected and utilized for test runner and asset generation.
+- **Host OS:** Windows 11 (AMD64)
+- **Godot Binary:** Godot 4.7.2 stable official (`Godot_v4.7.2-stable_win64_console.exe`) installed via WinGet.
+- **Python:** Python 3.14.3 utilized for automated dual test harness and asset validation.
 - **Node.js:** Node v20+ detected.
-- **Verification Harness:** `python tests/run_tests.py` runs all 33 domain invariant tests and all 20 level solvability proofs, completing with 100% success (exit code 0).
-- **Godot SceneTree Test Runner:** `tests/test_runner.gd` ready for native `godot --headless` execution once Godot is installed.
+- **Godot Native Test Harness:** `tests/test_runner.gd` executes 113 assertions (resource loading, data structures, invariants, all 28 deterministic tests, demo corridor scenario, 500-step randomized property fuzzing, error handling, and solver integration) with 100% success (exit code 0).
+- **Master Test Runner:** `python tests/run_tests.py` executes 79 deterministic test assertions plus all 20 level A* solvability proofs with 100% success (exit code 0).

@@ -27,12 +27,25 @@ func is_completed() -> bool:
 
 func try_action(action: int) -> Dictionary:
 	if _state == null:
-		return { "success": false, "event": &"uninitialized", "message": "Model not initialized." }
+		return {
+			"success": false,
+			"action": action,
+			"source_cell": Vector2i.ZERO,
+			"target_cell": Vector2i.ZERO,
+			"block_id": -1,
+			"block_color": -1,
+			"is_bridge": false,
+			"is_completed": false,
+			"rejection_reason": &"uninitialized",
+			"event": &"uninitialized",
+			"message": "Model not initialized.",
+			"next_state": null
+		}
 		
 	var res: Dictionary = GameRules.apply_action(_state, action)
-	_state = res["next_state"]
 	
 	if res["success"]:
+		_state = res["next_state"]
 		_history.record_state(_state)
 		turn_advanced.emit(_state.turn_count)
 		state_changed.emit(res["event"], res["message"])
@@ -40,6 +53,7 @@ func try_action(action: int) -> Dictionary:
 		if _state.is_completed:
 			level_completed.emit(_state.turn_count)
 	else:
+		# Invalid actions leave logical state completely unchanged and do not record history
 		state_changed.emit(res["event"], res["message"])
 		
 	return res
