@@ -4,7 +4,13 @@
 Write-Host "=== Auditing Godot 4.7 Development Environment ===" -ForegroundColor Cyan
 
 # 1. Check for Godot Executable
-$candidates = @("godot", "godot4", "godot.exe", "godot4.exe")
+$candidates = @(
+    "godot",
+    "godot4",
+    "godot.exe",
+    "godot4.exe",
+    "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\GodotEngine.GodotEngine_Microsoft.Winget.Source_8wekyb3d8bbwe\Godot_v4.7.2-stable_win64_console.exe"
+)
 $godotCmd = $null
 foreach ($name in $candidates) {
     $cmd = Get-Command $name -ErrorAction SilentlyContinue

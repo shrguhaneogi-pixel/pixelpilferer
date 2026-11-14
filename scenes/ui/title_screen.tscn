@@ -1,0 +1,77 @@
+[gd_scene load_steps=2 format=3 uid="uid://c4k78v9y1x0b2"]
+
+[ext_resource type="Script" path="res://scripts/ui/title_screen.gd" id="1_title"]
+
+[node name="TitleScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_title")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0588235, 0.0509804, 0.141176, 1)
+
+[node name="ClickToStartOverlay" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "PIXEL PILFERER
+
+Steal the world. Rebuild your escape.
+
+[ Click Anywhere to Start ]"
+
+[node name="MenuContainer" type="VBoxContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -120.0
+offset_top = -80.0
+offset_right = 120.0
+offset_bottom = 80.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="MenuContainer"]
+layout_mode = 2
+text = "PIXEL PILFERER"
+horizontal_alignment = 1
+
+[node name="Tagline" type="Label" parent="MenuContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.898039, 1, 1)
+text = "Steal the world. Rebuild your escape."
+horizontal_alignment = 1
+
+[node name="StartButton" type="Button" parent="MenuContainer"]
+layout_mode = 2
+text = "Start Adventure"
+
+[node name="ChaptersButton" type="Button" parent="MenuContainer"]
+layout_mode = 2
+text = "Chapter Select"
+
+[node name="SettingsButton" type="Button" parent="MenuContainer"]
+layout_mode = 2
+text = "Settings"
+
+[connection signal="pressed" from="MenuContainer/StartButton" to="." method="_on_start_pressed"]
+[connection signal="pressed" from="MenuContainer/ChaptersButton" to="." method="_on_chapters_pressed"]
+[connection signal="pressed" from="MenuContainer/SettingsButton" to="." method="_on_settings_pressed"]

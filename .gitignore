@@ -1,0 +1,27 @@
+# Godot 4+ specific ignores
+.godot/
+*.translation
+
+# Exported binaries & templates
+build/
+bin/
+*.apk
+*.aab
+*.exe
+*.zip
+*.pck
+
+# Editor and temporary files
+*.tmp
+*.log
+.import/
+export_credentials.cfg
+
+# Python testing artifacts
+__pycache__/
+*.pyc
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini

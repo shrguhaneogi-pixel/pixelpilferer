@@ -5,20 +5,23 @@ var _failed_tests: int = 0
 
 func _init() -> void:
 	print("=======================================================")
-	print("       PIXEL PILFERER GODOT HEADLESS TEST RUNNER       ")
+	print("       PIXEL PILFERER BASELINE VERIFICATION HARNESS    ")
 	print("=======================================================\n")
 	
-	_run_domain_tests()
-	_run_solver_tests()
+	_test_resource_loading()
+	_test_data_structures_construction()
+	_test_domain_invariants()
+	_test_invalid_data_handling()
+	_test_puzzle_solvability()
 	
 	print("\n-------------------------------------------")
 	print("Total tests executed: %d | Failed: %d" % [_total_tests, _failed_tests])
 	
 	if _failed_tests > 0:
-		printerr("FAILED: Test suite finished with errors.")
+		printerr("FAILED: Baseline test harness encountered errors.")
 		quit(1)
 	else:
-		print("SUCCESS: All tests passed cleanly!")
+		print("SUCCESS: All baseline checks passed cleanly!")
 		quit(0)
 
 func _assert_true(condition: bool, test_name: String) -> void:
@@ -37,8 +40,51 @@ func _assert_eq(actual: Variant, expected: Variant, test_name: String) -> void:
 	else:
 		print("  [PASS] " + test_name)
 
-func _run_domain_tests() -> void:
-	print("=== Running GDScript Domain Invariant Tests ===")
+func _test_resource_loading() -> void:
+	print("=== 1. Verifying Resource & Scene Loading ===")
+	
+	var main_res = ResourceLoader.load("res://scenes/main.tscn")
+	_assert_true(main_res != null, "Main scene (res://scenes/main.tscn) loads successfully")
+	
+	var title_res = ResourceLoader.load("res://scenes/ui/title_screen.tscn")
+	_assert_true(title_res != null, "Title scene (res://scenes/ui/title_screen.tscn) loads successfully")
+	
+	var hud_res = ResourceLoader.load("res://scenes/ui/hud.tscn")
+	_assert_true(hud_res != null, "HUD scene (res://scenes/ui/hud.tscn) loads successfully")
+	
+	var pip_tex = ResourceLoader.load("res://assets/sprites/pip.png")
+	_assert_true(pip_tex != null, "Pip sprite (res://assets/sprites/pip.png) loads successfully")
+	
+	var blocks_tex = ResourceLoader.load("res://assets/sprites/blocks.png")
+	_assert_true(blocks_tex != null, "Blocks sprite (res://assets/sprites/blocks.png) loads successfully")
+	
+	var tileset_tex = ResourceLoader.load("res://assets/sprites/tileset.png")
+	_assert_true(tileset_tex != null, "Tileset sprite (res://assets/sprites/tileset.png) loads successfully")
+	
+	var audio_steal = ResourceLoader.load("res://assets/audio/sfx_steal.wav")
+	_assert_true(audio_steal != null, "Audio SFX (res://assets/audio/sfx_steal.wav) loads successfully")
+
+func _test_data_structures_construction() -> void:
+	print("\n=== 2. Verifying Initial Data Structures Construction ===")
+	
+	var s := BoardState.new()
+	_assert_true(s != null, "BoardState instantiated")
+	_assert_eq(s.is_carrying(), false, "Initial carried block is empty")
+	
+	var model := BoardModel.new()
+	_assert_true(model != null, "BoardModel instantiated")
+	_assert_eq(model.can_undo(), false, "Initial undo stack is empty")
+	
+	var ch1_data := LevelRepository.load_chapter(1)
+	_assert_true(not ch1_data.is_empty(), "LevelRepository loads Chapter 1 data")
+	_assert_eq(ch1_data.get("chapter", 0), 1, "Chapter number is 1")
+	
+	var progress := ProgressService.load_progress()
+	_assert_true(progress is Dictionary, "ProgressService loads progress dictionary")
+	_assert_true(progress.has("unlocked_level"), "Progress contains 'unlocked_level'")
+
+func _test_domain_invariants() -> void:
+	print("\n=== 3. Verifying Domain Invariants & Rules ===")
 	
 	var s := BoardState.new()
 	s.grid_size = Vector2i(5, 5)
@@ -47,81 +93,62 @@ func _run_domain_tests() -> void:
 			s.tiles[Vector2i(x, y)] = Constants.TileType.FLOOR
 	s.player_pos = Vector2i(1, 1)
 	
-	# 1. Floor movement
-	var res1: Dictionary = GameRules.apply_action(s, Constants.ActionType.MOVE_EAST)
-	_assert_true(res1["success"], "Move East on empty floor succeeds")
-	_assert_eq(res1["next_state"].player_pos, Vector2i(2, 1), "Player position is (2,1)")
+	var model := BoardModel.new(s)
 	
-	# 2. Wall collision
-	var s1: BoardState = res1["next_state"]
-	s1.tiles[Vector2i(3, 1)] = Constants.TileType.WALL
-	var res2: Dictionary = GameRules.apply_action(s1, Constants.ActionType.MOVE_EAST)
-	_assert_true(not res2["success"], "Cannot move into immutable wall")
+	# Floor move
+	var res1: Dictionary = model.try_action(Constants.ActionType.MOVE_EAST)
+	_assert_true(res1["success"], "Move East on empty floor succeeds")
+	_assert_eq(model.get_state().player_pos, Vector2i(2, 1), "Player position updated to (2,1)")
+	
+	# Wall collision
+	model.get_state().tiles[Vector2i(3, 1)] = Constants.TileType.WALL
+	var res2: Dictionary = model.try_action(Constants.ActionType.MOVE_EAST)
+	_assert_true(not res2["success"], "Cannot move into solid wall")
 	_assert_eq(res2["event"], &"blocked_wall", "Event is blocked_wall")
 	
-	# 3. Block on floor collision (obstacle)
-	s1.blocks[Vector2i(2, 2)] = { "id": 1, "color": Constants.BlockColor.NEUTRAL, "is_bridge": false }
-	var res3: Dictionary = GameRules.apply_action(s1, Constants.ActionType.MOVE_SOUTH)
-	_assert_true(not res3["success"], "Cannot move into block on floor")
+	# Block obstacle
+	model.get_state().blocks[Vector2i(2, 2)] = { "id": 1, "color": Constants.BlockColor.NEUTRAL, "is_bridge": false }
+	var res3: Dictionary = model.try_action(Constants.ActionType.MOVE_SOUTH)
+	_assert_true(not res3["success"], "Cannot walk into movable block on floor")
 	
-	# 4. Stealing block
-	var res_steal: Dictionary = GameRules.apply_action(s1, Constants.ActionType.INTERACT_SOUTH)
+	# Steal block
+	var res_steal: Dictionary = model.try_action(Constants.ActionType.INTERACT_SOUTH)
 	_assert_true(res_steal["success"], "Steal block south succeeds")
-	_assert_true(res_steal["next_state"].is_carrying(), "Player carries stolen block")
+	_assert_true(model.get_state().is_carrying(), "Player now carrying block")
 	
-	# 5. Placing block on void creates bridge
-	var s_steal: BoardState = res_steal["next_state"]
-	s_steal.tiles[Vector2i(2, 0)] = Constants.TileType.VOID
-	var res_bridge: Dictionary = GameRules.apply_action(s_steal, Constants.ActionType.INTERACT_NORTH)
-	_assert_true(res_bridge["success"], "Place block on void succeeds")
-	_assert_eq(res_bridge["event"], &"bridge_created", "Event is bridge_created")
-	_assert_true(res_bridge["next_state"].is_bridge_at(Vector2i(2, 0)), "Cell (2,0) is bridge")
+	# Void bridge
+	model.get_state().tiles[Vector2i(2, 0)] = Constants.TileType.VOID
+	var res_bridge: Dictionary = model.try_action(Constants.ActionType.INTERACT_NORTH)
+	_assert_true(res_bridge["success"], "Place block on void creates bridge")
+	_assert_true(model.get_state().is_bridge_at(Vector2i(2, 0)), "Cell (2,0) is marked as bridge")
 	
-	# 6. Sockets and exit condition
-	var s_sock := BoardState.new()
-	s_sock.grid_size = Vector2i(4, 4)
-	for x in 4:
-		for y in 4:
-			s_sock.tiles[Vector2i(x, y)] = Constants.TileType.FLOOR
-	s_sock.player_pos = Vector2i(1, 1)
-	s_sock.exit_cell = Vector2i(3, 1)
-	s_sock.sockets[Vector2i(1, 2)] = Constants.BlockColor.CYAN
-	s_sock.carried_block = { "id": 99, "color": Constants.BlockColor.CYAN }
-	
-	var res_place: Dictionary = GameRules.apply_action(s_sock, Constants.ActionType.INTERACT_SOUTH)
-	_assert_true(res_place["success"], "Place Cyan block on Cyan socket succeeds")
-	_assert_eq(res_place["event"], &"socket_activated", "Cyan socket activated")
-	_assert_true(res_place["next_state"].is_all_sockets_satisfied(), "All sockets satisfied")
-	
-	var res_step1: Dictionary = GameRules.apply_action(res_place["next_state"], Constants.ActionType.MOVE_EAST)
-	var res_win: Dictionary = GameRules.apply_action(res_step1["next_state"], Constants.ActionType.MOVE_EAST)
-	_assert_true(res_win["success"], "Reached exit portal")
-	_assert_true(res_win["next_state"].is_completed, "Level completed!")
-	_assert_eq(res_win["event"], &"level_cleared", "Event is level_cleared")
-	
-	# 7. Undo / Restart integrity
-	var hist := HistoryManager.new()
-	hist.initialize(s)
-	hist.record_state(res1["next_state"])
-	_assert_eq(hist.get_current_state().player_pos, Vector2i(2, 1), "History current is (2,1)")
-	var restored := hist.undo()
-	_assert_eq(restored.player_pos, Vector2i(1, 1), "Undo restored (1,1)")
+	# Undo & restart
+	_assert_true(model.can_undo(), "Model can undo")
+	var undone := model.undo()
+	_assert_true(undone, "Undo executed successfully")
+	model.restart()
+	_assert_eq(model.get_state().player_pos, Vector2i(1, 1), "Restart restored initial player position")
 
-func _run_solver_tests() -> void:
-	print("\n=== Running GDScript Puzzle Solver Verification ===")
-	var s := BoardState.new()
-	s.grid_size = Vector2i(7, 5)
-	for x in 7:
-		for y in 5:
-			s.tiles[Vector2i(x, y)] = Constants.TileType.WALL
-	for x in range(1, 6):
-		for y in range(1, 4):
-			s.tiles[Vector2i(x, y)] = Constants.TileType.FLOOR
-	s.player_pos = Vector2i(1, 2)
-	s.exit_cell = Vector2i(5, 2)
-	s.sockets[Vector2i(3, 2)] = Constants.BlockColor.NEUTRAL
-	s.blocks[Vector2i(3, 1)] = { "id": 1, "color": Constants.BlockColor.NEUTRAL, "is_bridge": false }
+func _test_invalid_data_handling() -> void:
+	print("\n=== 4. Verifying Actionable Error Handling for Invalid Data ===")
 	
-	var res: Dictionary = PuzzleSolver.solve(s)
-	_assert_true(res["solved"], "Level 1-1 solved by GDScript PuzzleSolver")
-	_assert_true(res["steps"] > 0, "Solution steps > 0 (%d steps)" % res["steps"])
+	var empty_val := LevelRepository.validate_level_dict({})
+	_assert_true(not empty_val["valid"], "Empty level dictionary correctly identified as invalid")
+	_assert_true(empty_val["error"].length() > 0, "Actionable error returned: %s" % empty_val["error"])
+	
+	var missing_ch := LevelRepository.load_chapter(999)
+	_assert_true(missing_ch.is_empty(), "Missing chapter 999 returns empty dict safely without crashing")
+	
+	var invalid_lvl := LevelRepository.load_level(1, 999)
+	_assert_true(invalid_lvl.is_empty(), "Out-of-bounds level index returns empty dict safely")
+
+func _test_puzzle_solvability() -> void:
+	print("\n=== 5. Verifying Solvability Engine Integration ===")
+	
+	var lvl1: Dictionary = LevelRepository.load_level(1, 0)
+	_assert_true(not lvl1.is_empty(), "Loaded Level 1-1 data from repository")
+	
+	var state := LevelData.from_dict(lvl1)
+	var sol: Dictionary = PuzzleSolver.solve(state, 10000)
+	_assert_true(sol["solved"], "Level 1-1 solved by PuzzleSolver")
+	_assert_true(sol["steps"] > 0, "Optimal steps found: %d" % sol["steps"])

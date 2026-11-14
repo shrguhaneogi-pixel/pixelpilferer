@@ -1,0 +1,120 @@
+[gd_scene load_steps=2 format=3 uid="uid://e1m2n3b4v5c6"]
+
+[ext_resource type="Script" path="res://scripts/ui/hud.gd" id="1_hud"]
+
+[node name="HUD" type="CanvasLayer"]
+script = ExtResource("1_hud")
+
+[node name="TopBar" type="HBoxContainer" parent="."]
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 12.0
+offset_top = 8.0
+offset_right = -12.0
+offset_bottom = 36.0
+grow_horizontal = 2
+
+[node name="TitleLabel" type="Label" parent="TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Ch 1-1: First Steps"
+
+[node name="TurnLabel" type="Label" parent="TopBar"]
+layout_mode = 2
+text = "Turns: 0"
+
+[node name="UndoBtn" type="Button" parent="TopBar"]
+layout_mode = 2
+text = "Undo [Z]"
+
+[node name="RestartBtn" type="Button" parent="TopBar"]
+layout_mode = 2
+text = "Restart [R]"
+
+[node name="HintBtn" type="Button" parent="TopBar"]
+layout_mode = 2
+text = "Hint [H]"
+
+[node name="MenuBtn" type="Button" parent="TopBar"]
+layout_mode = 2
+text = "Menu [Esc]"
+
+[node name="HintPanel" type="PanelContainer" parent="."]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -160.0
+offset_top = -40.0
+offset_right = 160.0
+offset_bottom = 40.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="HintPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="VBox" type="VBoxContainer" parent="HintPanel/MarginContainer"]
+layout_mode = 2
+
+[node name="HintText" type="Label" parent="HintPanel/MarginContainer/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+autowrap_mode = 2
+
+[node name="CloseBtn" type="Button" parent="HintPanel/MarginContainer/VBox"]
+layout_mode = 2
+text = "Close"
+
+[node name="WinModal" type="PanelContainer" parent="."]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -140.0
+offset_top = -60.0
+offset_right = 140.0
+offset_bottom = 60.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="WinModal"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="VBox" type="VBoxContainer" parent="WinModal/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="WinModal/MarginContainer/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.0235294, 0.839216, 0.627451, 1)
+text = "LEVEL CLEARED!"
+horizontal_alignment = 1
+
+[node name="StatsLabel" type="Label" parent="WinModal/MarginContainer/VBox"]
+layout_mode = 2
+text = "Completed in 12 turns!"
+horizontal_alignment = 1
+
+[node name="NextBtn" type="Button" parent="WinModal/MarginContainer/VBox"]
+layout_mode = 2
+text = "Next Level"
+
+[connection signal="pressed" from="TopBar/UndoBtn" to="." method="_on_undo_button_pressed"]
+[connection signal="pressed" from="TopBar/RestartBtn" to="." method="_on_restart_button_pressed"]
+[connection signal="pressed" from="TopBar/HintBtn" to="." method="_on_hint_button_pressed"]
+[connection signal="pressed" from="TopBar/MenuBtn" to="." method="_on_menu_button_pressed"]
+[connection signal="pressed" from="HintPanel/MarginContainer/VBox/CloseBtn" to="." method="_on_close_hint_pressed"]
+[connection signal="pressed" from="WinModal/MarginContainer/VBox/NextBtn" to="." method="_on_next_level_button_pressed"]

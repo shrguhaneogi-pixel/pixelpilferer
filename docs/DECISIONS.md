@@ -30,11 +30,11 @@
 - **Decision:** Store deep copies of `BoardState` on each turn. Undo simply restores the prior state snapshot and signals the view to resynchronize.
 - **Consequences:** Bulletproof undo/restart behavior with negligible memory footprint for grid sizes under 30x30.
 
-## ADR 006: Visual Resolution & Pixel-Art Snapping
+## ADR 006: Viewport Resolution (640x360) & Pixel-Art Snapping
 - **Status:** Accepted
-- **Context:** Modern high-DPI displays cause pixel-art jitter if subpixel positioning or bilinear filtering is active.
-- **Decision:** Configure base viewport at `320x180` (16:9 aspect ratio, 16x16 tiles = 20x11.25 tiles visible). Stretch mode: `canvas_items` with integer scale. Enable `snap_2d_transforms_to_pixel` and `snap_2d_vertices_to_pixel`. Default texture filter: `Nearest`.
-- **Consequences:** Crisp retro aesthetic, square pixels at 720p (4x), 1080p (6x), and 1440p (8x).
+- **Context:** To ensure optimal UI legibility across high-DPI desktop and browser windows while maintaining a strict retro pixel grid without subpixel jitter.
+- **Decision:** Configure base viewport at `640x360` (16:9 aspect ratio, 16x16 tiles = 40x22.5 tiles visible). Stretch mode: `viewport` with integer scaling (`scale_mode = "integer"`). Enable `snap_2d_transforms_to_pixel` and `snap_2d_vertices_to_pixel`. Default texture filter: `Nearest`.
+- **Consequences:** Perfect pixel integrity at 720p (2x), 1080p (3x), and 1440p (4x), with razor-sharp text and pixel sprites.
 
 ## ADR 007: Single-Threaded Web Export
 - **Status:** Accepted

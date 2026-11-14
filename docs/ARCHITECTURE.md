@@ -11,28 +11,35 @@ Pixel Pilferer uses a **Strict Model-View Separation** architecture. The logical
                    │  _unhandled_input()
                    ▼
        ┌────────────────────────┐
-       │  Gameplay Controller   │
+       │     GameController     │
        └───────────┬────────────┘
                    │  Action (MOVE_*, INTERACT_*)
                    ▼
 ┌──────────────────────────────────────────────┐
 │           Pure Domain Model (Model)          │
-│ - BoardState: Immutable cell grid & entities │
-│ - GameRules: Authoritative state transition  │
-│              (S_t, Action) -> S_{t+1}        │
+│ - BoardModel: Authoritative state & actions  │
+│ - BoardState: Immutable cell grid snapshot   │
+│ - GameRules: State transition function       │
 │ - HistoryManager: Snapshot-based Undo / Redo │
-│ - PuzzleSolver: Headless BFS solvability     │
+│ - PuzzleSolver: A* & BFS Solvability Engine  │
 └──────────────┬───────────────────────────────┘
                │  Signals / State Events
                ▼
 ┌──────────────────────────────────────────────┐
 │             View Layer (View/Godot)          │
-│ - LevelView (Orchestrator)                   │
-│ - TileMapLayers: Base, Void, Walls, Sockets  │
+│ - BoardRenderer (TileMapLayers & Entities)   │
+│ - TileMapLayers: Void, Floor, Sockets, Walls │
 │ - PlayerView (Sprite2D + Tween)              │
 │ - BlockView (Sprite2D + Tween)               │
-│ - AudioManager (Procedural SFX / Ambient)    │
-│ - PixelPerfectCamera (Snap to integer pixel) │
+│ - AudioService (Procedural SFX & Volume)     │
+│ - PixelCamera (Integer-rounded 2D Camera)    │
+└──────────────────────────────────────────────┘
+               │
+               ▼
+┌──────────────────────────────────────────────┐
+│                Services Layer                │
+│ - LevelRepository: Level JSON Loading/Schema │
+│ - ProgressService: Save data, high scores    │
 └──────────────────────────────────────────────┘
 ```
 
