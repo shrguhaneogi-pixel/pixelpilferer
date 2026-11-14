@@ -37,6 +37,18 @@ func play_sfx(sfx_name: StringName) -> void:
 func play_steal() -> void: play_sfx(&"steal")
 func play_place() -> void: play_sfx(&"place")
 func play_socket() -> void: play_sfx(&"socket")
-func play_step() -> void: play_sfx(&"step")
+func play_step() -> void:
+	if _players.has(&"step"):
+		var p: AudioStreamPlayer = _players[&"step"]
+		p.pitch_scale = 1.0
+	play_sfx(&"step")
 func play_undo() -> void: play_sfx(&"undo")
 func play_win() -> void: play_sfx(&"win")
+func play_bump() -> void:
+	if not sfx_enabled:
+		return
+	if _players.has(&"step"):
+		var player: AudioStreamPlayer = _players[&"step"]
+		player.pitch_scale = 0.5
+		player.volume_db = linear_to_db(clampf(sfx_volume * 0.75, 0.0001, 1.0))
+		player.play()

@@ -6,15 +6,23 @@
 | :--- | :--- | :---: | :--- |
 | **Phase 1** | Foundation & Architecture | **COMPLETE** | Godot 4.7.2 baseline, 640x360 viewport, `gl_compatibility` renderer, TileMapLayers, clean module boundaries. |
 | **Phase 2** | Deterministic Puzzle Engine | **COMPLETE** | 8 canonical actions, structured `ActionResult`, 28 test cases, 500-step property fuzzing, demo corridor, and canonical hashing. |
-| **Phase 3** | 20 Handcrafted Levels & Solvability | **COMPLETE** | All 20 levels designed in JSON & mathematically proven solvable via A* search heuristic. |
-| **Phase 4** | Pixel-Art Assets & Audio Synthesis | **COMPLETE** | 16x16 pixel sprites (Pip, blocks, tileset, sockets, portal, icon) & 6 WAV SFX. |
-| **Phase 5** | Godot View Adapters & Rendering | **COMPLETE** | TileMapLayers, tweens, pixel camera, audio manager, level view. |
+| **Phase 3** | Playable Vertical Slice | **COMPLETE** | Full board rendering, 120ms smooth movement & particles, WASD + Shift+Dir + E + mouse adjacent clicks, input buffering, carried-block HUD, and 3 authored demo puzzles. |
+| **Phase 4** | 20 Handcrafted Levels & Campaign Expansion | **COMPLETE** | All 20 campaign levels designed in JSON & mathematically proven solvable via A* search heuristic. |
+| **Phase 5** | Pixel-Art Assets & Audio Synthesis | **COMPLETE** | 16x16 pixel sprites (Pip, blocks, tileset, sockets, portal, icon) & 6 WAV SFX. |
 | **Phase 6** | UI, Progression, Settings & Release | **COMPLETE** | Title screen, chapter select, HUD, save system, desktop & web export presets. |
 
 ---
 
-## 2. 20 Level Solvability Matrix (100% Verified)
+## 2. Level Solvability Matrix (23 / 23 Solved — 100% Verified)
 
+### Authored Demo Levels (Chapter 0: Tutorial & Demo)
+| Chapter | Level | ID | Name | Sockets | Blocks | A* Solved | Min Steps |
+| :---: | :---: | :---: | :--- | :---: | :---: | :---: | :---: |
+| **0** | 1 | `demo_01` | The Obstructed Path | 0 (None) | 1 (Neutral) | **YES** | 5 |
+| **0** | 2 | `demo_02` | Chasm Bridge | 0 (None) | 1 (Neutral) | **YES** | 6 |
+| **0** | 3 | `demo_03` | Chromatic Socket | 1 (Cyan) | 1 (Cyan) | **YES** | 6 |
+
+### Campaign Chapters (Chapters 1–4)
 | Chapter | Level | ID | Name | Sockets | Blocks | A* Solved | Min Steps |
 | :---: | :---: | :---: | :--- | :---: | :---: | :---: | :---: |
 | **1** | 1 | `ch1_01` | First Steps | 1 (Neutral) | 1 (Neutral) | **YES** | 13 |
@@ -44,7 +52,6 @@
 
 - **Host OS:** Windows 11 (AMD64)
 - **Godot Binary:** Godot 4.7.2 stable official (`Godot_v4.7.2-stable_win64_console.exe`) installed via WinGet.
-- **Python:** Python 3.14.3 utilized for automated dual test harness and asset validation.
-- **Node.js:** Node v20+ detected.
-- **Godot Native Test Harness:** `tests/test_runner.gd` executes 113 assertions (resource loading, data structures, invariants, all 28 deterministic tests, demo corridor scenario, 500-step randomized property fuzzing, error handling, and solver integration) with 100% success (exit code 0).
-- **Master Test Runner:** `python tests/run_tests.py` executes 79 deterministic test assertions plus all 20 level A* solvability proofs with 100% success (exit code 0).
+- **Python:** Python 3.14.3 utilized for automated dual test harness, level validation, and asset checks.
+- **Godot Native Test Harness:** `tests/test_runner.gd` executes **198 assertions** (resource loading, data structures, invariants, all 28 deterministic tests, demo corridor scenario, 500-step randomized property fuzzing, board rendering, player animation & particles, block views, input handling & buffering, HUD upgrades, and sequential demo progression) with 100% success (exit code 0).
+- **Master Test Runner:** `python tests/run_tests.py` executes 79 deterministic test assertions, the vertical slice demo verification suite, and all 23 level A* solvability proofs with 100% success (exit code 0).

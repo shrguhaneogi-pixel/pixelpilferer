@@ -8,6 +8,10 @@ signal settings_pressed
 @onready var menu_container: VBoxContainer = $MenuContainer
 
 func _ready() -> void:
+	for child in find_children("*", "Button"):
+		if child is Button:
+			child.focus_mode = Control.FOCUS_NONE
+			
 	# Click to Start prompt ensures web audio context unlocks
 	if click_prompt:
 		click_prompt.visible = true

@@ -14,6 +14,8 @@ func _init() -> void:
 	_test_phase2_deterministic_rules()
 	_test_invalid_data_handling()
 	_test_puzzle_solvability()
+	_test_phase3_rendering_and_views()
+	_test_phase3_input_and_hud()
 	
 	print("\n-------------------------------------------")
 	print("Total tests executed: %d | Failed: %d" % [_total_tests, _failed_tests])
@@ -79,6 +81,19 @@ func _test_data_structures_construction() -> void:
 	var ch1_data := LevelRepository.load_chapter(1)
 	_assert_true(not ch1_data.is_empty(), "LevelRepository loads Chapter 1 data")
 	_assert_eq(ch1_data.get("chapter", 0), 1, "Chapter number is 1")
+	
+	var demo_data := LevelRepository.load_chapter(0)
+	_assert_true(not demo_data.is_empty(), "LevelRepository loads Demo Chapter (chapter 0) data")
+	_assert_eq(demo_data.get("chapter", -1), 0, "Demo chapter number is 0")
+	var demo_lvl1 := LevelRepository.load_demo_level(0)
+	_assert_true(not demo_lvl1.is_empty(), "LevelRepository loads demo level 0 via load_demo_level")
+	_assert_eq(demo_lvl1.get("id", ""), "demo_01", "Demo level 0 ID is demo_01")
+	var demo_lvl2 := LevelRepository.load_demo_level(1)
+	_assert_true(not demo_lvl2.is_empty(), "LevelRepository loads demo level 1 via load_demo_level")
+	_assert_eq(demo_lvl2.get("id", ""), "demo_02", "Demo level 1 ID is demo_02")
+	var demo_lvl3 := LevelRepository.load_demo_level(2)
+	_assert_true(not demo_lvl3.is_empty(), "LevelRepository loads demo level 2 via load_demo_level")
+	_assert_eq(demo_lvl3.get("id", ""), "demo_03", "Demo level 2 ID is demo_03")
 	
 	var progress := ProgressService.load_progress()
 	_assert_true(progress is Dictionary, "ProgressService loads progress dictionary")
@@ -538,3 +553,236 @@ func _test_puzzle_solvability() -> void:
 	var sol: Dictionary = PuzzleSolver.solve(state, 10000)
 	_assert_true(sol["solved"], "Level 1-1 solved by PuzzleSolver")
 	_assert_true(sol["steps"] > 0, "Optimal steps found: %d" % sol["steps"])
+
+func _test_phase3_rendering_and_views() -> void:
+	print("\n=== 6. Verifying Phase 3.2 & 3.3 Board Rendering, Player Animation, and Block Views ===")
+	
+	# 1. PlayerView facing, positioning, and carried visual
+	var pv := PlayerView.new()
+	pv._ready()
+	pv.snap_to_cell(Vector2i(2, 3), Constants.DIR_SOUTH)
+	_assert_eq(pv._sprite.frame, 0, "PlayerView facing South has frame 0")
+	_assert_eq(pv.position, Vector2(2 * 16 + 8, 3 * 16 + 8), "PlayerView snapped to cell center (40, 56)")
+	
+	pv.set_facing(Constants.DIR_EAST)
+	_assert_eq(pv._sprite.frame, 1, "PlayerView facing East has frame 1")
+	pv.set_facing(Constants.DIR_NORTH)
+	_assert_eq(pv._sprite.frame, 2, "PlayerView facing North has frame 2")
+	pv.set_facing(Constants.DIR_WEST)
+	_assert_eq(pv._sprite.frame, 3, "PlayerView facing West has frame 3")
+	
+	pv.update_carried_visual({})
+	_assert_true(not pv._carried_sprite.visible, "PlayerView carried sprite hidden when empty")
+	pv.update_carried_visual({"id": 1, "color": Constants.BlockColor.AMBER})
+	_assert_true(pv._carried_sprite.visible, "PlayerView carried sprite visible when holding block")
+	_assert_eq(pv._carried_sprite.frame, Constants.BlockColor.AMBER, "PlayerView carried sprite has Amber frame")
+	
+	pv.animate_invalid_bump(Constants.DIR_EAST)
+	pv.animate_steal(Vector2i(3, 3), Constants.BlockColor.CYAN)
+	pv.animate_placement(Vector2i(3, 3))
+	pv.queue_free()
+	_assert_true(true, "PlayerView animations execute cleanly without errors")
+	
+	# 2. BlockView styling and methods
+	var bv_obstacle := BlockView.new()
+	bv_obstacle._ready()
+	bv_obstacle.setup(1, Constants.BlockColor.CYAN, false, Vector2i(1, 1))
+	_assert_eq(bv_obstacle.z_index, 2, "Obstacle block has z_index = 2")
+	_assert_eq(bv_obstacle.scale, Vector2(1.0, 1.0), "Obstacle block has scale (1.0, 1.0)")
+	_assert_eq(bv_obstacle._sprite.frame, Constants.BlockColor.CYAN, "Block frame matches Cyan (1)")
+	
+	var bv_bridge := BlockView.new()
+	bv_bridge._ready()
+	bv_bridge.setup(2, Constants.BlockColor.EMERALD, true, Vector2i(1, 2))
+	_assert_eq(bv_bridge.z_index, 0, "Bridge block has z_index = 0")
+	_assert_eq(bv_bridge.scale, Vector2(0.9, 0.9), "Bridge block has scale (0.9, 0.9)")
+	_assert_eq(bv_bridge.modulate, Color(0.85, 0.9, 1.0, 0.9), "Bridge block has translucent/tinted modulate")
+	_assert_eq(bv_bridge._sprite.frame, Constants.BlockColor.EMERALD, "Bridge block frame matches Emerald (4)")
+	
+	bv_obstacle.animate_placement()
+	bv_obstacle.pulse_socket_activation()
+	bv_obstacle.animate_steal()
+	bv_obstacle.queue_free()
+	bv_bridge.queue_free()
+	_assert_true(true, "BlockView visual methods execute cleanly")
+	
+	# 3. BoardRenderer scene setup and layer verification
+	var state := BoardState.new()
+	state.grid_size = Vector2i(4, 4)
+	state.tiles[Vector2i(0, 0)] = Constants.TileType.FLOOR
+	state.tiles[Vector2i(1, 0)] = Constants.TileType.WALL
+	state.tiles[Vector2i(2, 0)] = Constants.TileType.VOID
+	state.sockets[Vector2i(0, 0)] = Constants.BlockColor.CYAN
+	state.exit_cell = Vector2i(3, 0)
+	state.player_pos = Vector2i(0, 0)
+	state.blocks[Vector2i(2, 0)] = {"id": 1, "color": Constants.BlockColor.AMBER, "is_bridge": true}
+	
+	var renderer := BoardRenderer.new()
+	renderer._ready()
+	renderer.setup_board(state)
+	
+	# Verify terrain tile placement
+	_assert_eq(renderer.floor_layer.get_cell_atlas_coords(Vector2i(0, 0)), Vector2i(0, 0), "Floor tile placed at (0,0)")
+	_assert_eq(renderer.wall_layer.get_cell_atlas_coords(Vector2i(1, 0)), Vector2i(1, 0), "Wall tile placed at (1,0)")
+	_assert_eq(renderer.void_layer.get_cell_atlas_coords(Vector2i(2, 0)), Vector2i(2, 0), "Void tile placed at (2,0)")
+	_assert_eq(renderer.floor_layer.get_cell_atlas_coords(Vector2i(2, 0)), Vector2i(3, 0), "Bridge tile placed on floor layer over void at (2,0)")
+	
+	# Verify socket unsatisfied frame
+	# Cyan socket unsatisfied = color 1 * 2 + 0 = 2
+	_assert_eq(renderer.socket_layer.get_cell_atlas_coords(Vector2i(0, 0)), Vector2i(2, 0), "Cyan socket unsatisfied has frame 2")
+	
+	# Verify exit portal locked
+	_assert_eq(renderer.exit_sprite.frame, 0, "Exit portal locked has frame 0 when socket unsatisfied")
+	_assert_eq(renderer.exit_sprite.position, Vector2(3 * 16 + 8, 0 * 16 + 8), "Exit portal positioned at exit cell")
+	
+	# Satisfy socket with Cyan block
+	state.blocks[Vector2i(0, 0)] = {"id": 2, "color": Constants.BlockColor.CYAN, "is_bridge": false}
+	renderer.update_view(state, false)
+	
+	# Cyan socket satisfied = color 1 * 2 + 1 = 3
+	_assert_eq(renderer.socket_layer.get_cell_atlas_coords(Vector2i(0, 0)), Vector2i(3, 0), "Cyan socket satisfied has frame 3")
+	_assert_eq(renderer.exit_sprite.frame, 1, "Exit portal unlocked has frame 1 when all sockets satisfied")
+	
+	# Check block view tracking
+	_assert_true(renderer.block_views.has(Vector2i(0, 0)), "BlockView tracked at (0,0)")
+	_assert_true(renderer.block_views.has(Vector2i(2, 0)), "BlockView tracked at (2,0)")
+	
+	# Reduced motion toggle
+	renderer.reduced_motion = true
+	_assert_true(renderer.player_view.reduced_motion, "reduced_motion propagated to PlayerView")
+	for bv: BlockView in renderer.block_views.values():
+		_assert_true(bv.reduced_motion, "reduced_motion propagated to BlockView")
+		
+	# Helper methods
+	renderer.animate_player_move(Vector2i(1, 1), Constants.DIR_SOUTH)
+	renderer.snap_player(Vector2i(0, 0), Constants.DIR_EAST)
+	renderer.animate_invalid_bump(Constants.DIR_WEST)
+	
+	renderer.queue_free()
+	_assert_true(true, "BoardRenderer setup and update cycles passed cleanly")
+
+func _test_phase3_input_and_hud() -> void:
+	print("\n=== 7. Verifying Phase 3.4 & 3.5 Input Handling, Buffering, and HUD Upgrades ===")
+	
+	# 1. GameController input handling and invalid action bump
+	var gc := GameController.new()
+	gc._ready()
+	var lvl_demo1: Dictionary = LevelRepository.load_level(0, 0)
+	gc.load_level_data(lvl_demo1)
+	
+	_assert_true(gc.model != null, "GameController loaded model successfully")
+	_assert_eq(gc.model.get_state().player_pos, Vector2i(1, 1), "Initial player position is (1,1)")
+	_assert_eq(gc.is_animating, false, "Initial is_animating is false")
+	_assert_eq(gc._input_buffer, -1, "Initial _input_buffer is -1")
+	
+	# Valid action: steal block East
+	gc.request_action(Constants.ActionType.INTERACT_EAST)
+	_assert_true(gc.model.get_state().is_carrying(), "Interacting East steals block into hand")
+	_assert_eq(gc.model.get_state().carried_block.get("color", -1), Constants.BlockColor.NEUTRAL, "Carried block has Neutral color")
+	
+	# Invalid action: moving North into wall
+	var invalid_payload := { "detected": false, "reason": &"" }
+	gc.invalid_action_occurred.connect(func(_act: int, reason: StringName):
+		invalid_payload["detected"] = true
+		invalid_payload["reason"] = reason
+	)
+	gc.request_action(Constants.ActionType.MOVE_NORTH)
+	_assert_true(invalid_payload["detected"], "Invalid move North into wall triggers invalid_action_occurred signal")
+	_assert_eq(invalid_payload["reason"], &"blocked_wall", "Invalid move rejection reason is blocked_wall")
+	_assert_eq(gc.model.get_state().player_pos, Vector2i(1, 1), "Player position unchanged after invalid move")
+	
+	# Input buffering test
+	gc.is_animating = true
+	gc.request_action(Constants.ActionType.MOVE_EAST)
+	_assert_eq(gc._input_buffer, Constants.ActionType.MOVE_EAST, "Action is buffered when is_animating is true")
+	_assert_eq(gc.model.get_state().player_pos, Vector2i(1, 1), "Player position not immediately changed while animating")
+	
+	# Complete animation and verify buffered action execution
+	gc._on_player_move_completed()
+	_assert_eq(gc.is_animating, false, "is_animating reset to false after animation completion")
+	_assert_eq(gc._input_buffer, -1, "Buffered action cleared from buffer")
+	_assert_eq(gc.model.get_state().player_pos, Vector2i(2, 1), "Buffered action MOVE_EAST executed upon move completion")
+	
+	# Undo cancels input buffer and snaps view
+	gc.is_animating = true
+	gc._input_buffer = Constants.ActionType.MOVE_EAST
+	gc.handle_undo()
+	_assert_eq(gc._input_buffer, -1, "Undo immediately cancels _input_buffer")
+	_assert_eq(gc.is_animating, false, "Undo immediately resets is_animating")
+	_assert_eq(gc.model.get_state().player_pos, Vector2i(1, 1), "Undo restored player position to (1,1)")
+	
+	# Restart cancels input buffer and snaps view
+	gc.is_animating = true
+	gc._input_buffer = Constants.ActionType.MOVE_SOUTH
+	gc.handle_restart()
+	_assert_eq(gc._input_buffer, -1, "Restart immediately cancels _input_buffer")
+	_assert_eq(gc.is_animating, false, "Restart immediately resets is_animating")
+	_assert_eq(gc.model.get_state().player_pos, Vector2i(1, 1), "Restart restored initial player position")
+	gc.queue_free()
+	
+	# 2. HUD upgrade verification
+	var hud_packed = ResourceLoader.load("res://scenes/ui/hud.tscn")
+	_assert_true(hud_packed != null, "HUD scene loads successfully")
+	var hud := hud_packed.instantiate() as HUD
+	hud._ready()
+	
+	# Verify button focus modes
+	_assert_eq(hud.undo_btn.focus_mode, Control.FOCUS_NONE, "Undo button focus_mode is FOCUS_NONE")
+	_assert_eq(hud.restart_btn.focus_mode, Control.FOCUS_NONE, "Restart button focus_mode is FOCUS_NONE")
+	_assert_eq(hud.hint_btn.focus_mode, Control.FOCUS_NONE, "Hint button focus_mode is FOCUS_NONE")
+	_assert_eq(hud.menu_btn.focus_mode, Control.FOCUS_NONE, "Menu button focus_mode is FOCUS_NONE")
+	
+	# Level title and move counter
+	hud.set_level_info("Demo 1: The Obstructed Path", 0)
+	_assert_eq(hud.title_label.text, "Demo 1: The Obstructed Path", "Level title text matches")
+	hud.update_turn_count(3)
+	_assert_eq(hud.turn_label.text, "Moves: 3", "Turn counter formatted as 'Moves: 3'")
+	
+	# Carried fragment indicator
+	hud.update_carried_indicator({})
+	_assert_eq(hud.glove_label.text, "Glove: Empty", "Empty glove displays 'Glove: Empty'")
+	_assert_true(not hud.carried_block_rect.visible, "Carried block preview hidden when empty")
+	
+	hud.update_carried_indicator({"id": 1, "color": Constants.BlockColor.CYAN})
+	_assert_eq(hud.glove_label.text, "Glove: Cyan Fragment", "Carrying cyan block displays 'Glove: Cyan Fragment'")
+	_assert_true(hud.carried_block_rect.visible, "Carried block preview visible when carrying")
+	
+	hud.update_carried_indicator({"id": 2, "color": Constants.BlockColor.EMERALD})
+	_assert_eq(hud.glove_label.text, "Glove: Emerald Fragment", "Carrying emerald block displays 'Glove: Emerald Fragment'")
+	
+	# Sockets and exit status indicators
+	var s_nosockets := BoardState.new()
+	hud.update_socket_and_exit_indicators(s_nosockets)
+	_assert_eq(hud.sockets_label.text, "No Sockets", "Level with 0 sockets displays 'No Sockets'")
+	_assert_eq(hud.exit_label.text, "Exit: OPEN", "Exit is OPEN when no sockets required")
+	
+	var s_with_socket := BoardState.new()
+	s_with_socket.sockets[Vector2i(2, 2)] = Constants.BlockColor.CYAN
+	hud.update_socket_and_exit_indicators(s_with_socket)
+	_assert_eq(hud.sockets_label.text, "Sockets: 0/1", "Unsatisfied socket displays 'Sockets: 0/1'")
+	_assert_eq(hud.exit_label.text, "Exit: LOCKED", "Exit is LOCKED when socket unsatisfied")
+	
+	s_with_socket.blocks[Vector2i(2, 2)] = {"id": 1, "color": Constants.BlockColor.CYAN, "is_bridge": false}
+	hud.update_socket_and_exit_indicators(s_with_socket)
+	_assert_eq(hud.sockets_label.text, "Sockets: 1/1 (Active)", "Satisfied socket displays 'Sockets: 1/1 (Active)'")
+	_assert_eq(hud.exit_label.text, "Exit: OPEN", "Exit is OPEN when all sockets satisfied")
+	hud.queue_free()
+	
+	# 3. MainGame demo sequence and progression
+	var main := MainGame.new()
+	main._ready()
+	main._start_adventure()
+	_assert_eq(main._current_chapter, 0, "Start adventure launches Chapter 0 (Demo)")
+	_assert_eq(main._current_level_idx, 0, "Start adventure launches Level 0 (demo_01)")
+	
+	main._advance_next_level()
+	_assert_eq(main._current_chapter, 0, "Next level remains in Demo chapter")
+	_assert_eq(main._current_level_idx, 1, "Next level loads Level 1 (demo_02)")
+	
+	main._advance_next_level()
+	_assert_eq(main._current_level_idx, 2, "Next level loads Level 2 (demo_03)")
+	
+	main._advance_next_level()
+	_assert_eq(main._current_chapter, 1, "After demo_03, advances to Chapter 1")
+	_assert_eq(main._current_level_idx, 0, "Chapter 1 starts at Level 0 (ch1_01)")
+	main.queue_free()

@@ -168,8 +168,49 @@ def solve_level(initial_state: BoardState, max_visited: int = 60000) -> Dict[str
     }
 
 
+def verify_demo_levels(levels_dir: str = "data/levels") -> bool:
+    print("=== Verifying Demo Levels with Solver ===")
+    demo_path = os.path.join(levels_dir, "demo_levels.json")
+    if not os.path.exists(demo_path):
+        print(f"Error: Demo level file not found at {demo_path}")
+        return False
+
+    with open(demo_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    expected_steps = {
+        "demo_01": 5,
+        "demo_02": 6,
+        "demo_03": 6
+    }
+    all_passed = True
+    levels = data.get("levels", [])
+    if len(levels) != 3:
+        print(f"Error: Expected 3 demo levels, found {len(levels)}")
+        return False
+
+    for lvl in levels:
+        lvl_id = lvl["id"]
+        lvl_name = lvl["name"]
+        state = load_level_from_dict(lvl)
+        res = solve_level(state)
+        if not res["solved"]:
+            print(f"  [FAILED] {lvl_id} - '{lvl_name}': {res.get('error', 'Unsolvable')}")
+            all_passed = False
+            continue
+        exp = expected_steps.get(lvl_id)
+        if exp is not None and res["steps"] != exp:
+            print(f"  [WARN] {lvl_id} solved in {res['steps']} steps (expected minimal: {exp})")
+            if res["steps"] > exp:
+                all_passed = False
+        action_names = [act.name for act in res["actions"]]
+        print(f"  [SOLVED] {lvl_id} - '{lvl_name}': {res['steps']} steps (Visited: {res['visited_count']}, Time: {res['time_sec']}s)")
+        print(f"           Steps: {' -> '.join(action_names)}")
+    return all_passed
+
+
 def verify_all_levels(levels_dir: str = "data/levels") -> bool:
-    print("=== Verifying All 20 Handcrafted Levels with Solver ===")
+    print("=== Verifying All Handcrafted and Demo Levels with Solver ===")
     total_levels = 0
     solved_levels = 0
 
@@ -209,7 +250,7 @@ def verify_all_levels(levels_dir: str = "data/levels") -> bool:
 
     print("\n===========================================")
     print(f"Solvability Result: {solved_levels} / {total_levels} levels verified solvable.")
-    return total_levels == 20 and solved_levels == 20
+    return total_levels >= 20 and solved_levels == total_levels
 
 
 if __name__ == "__main__":

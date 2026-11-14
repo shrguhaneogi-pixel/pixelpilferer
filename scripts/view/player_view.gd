@@ -1,7 +1,11 @@
 class_name PlayerView extends Node2D
 
+## Visual representation of Pip: movement tweens, 4-directional facing, carried fragments, and interaction feedback.
+
+signal move_completed
+
 @export var tile_size: int = 16
-@export var move_duration: float = 0.10
+@export var move_duration: float = 0.12
 @export var reduced_motion: bool = false
 
 var _sprite: Sprite2D
@@ -10,7 +14,7 @@ var _active_tween: Tween
 var _current_cell: Vector2i = Vector2i.ZERO
 
 func _ready() -> void:
-	# Main Pip sprite
+	# Main Pip sprite (4 directions: South=0, East=1, North=2, West=3)
 	_sprite = Sprite2D.new()
 	if ResourceLoader.exists("res://assets/sprites/pip.png"):
 		_sprite.texture = load("res://assets/sprites/pip.png")
@@ -44,28 +48,87 @@ func set_facing(direction: Vector2i) -> void:
 	elif direction == Constants.DIR_WEST:
 		_sprite.frame = 3
 
-func snap_to_cell(cell: Vector2i, facing: Vector2i = Constants.DIR_SOUTH) -> void:
+func cancel_tweens() -> void:
 	if _active_tween and _active_tween.is_valid():
 		_active_tween.kill()
+
+func snap_to_cell(cell: Vector2i, facing: Vector2i = Constants.DIR_SOUTH) -> void:
+	cancel_tweens()
 		
 	_current_cell = cell
 	position = Vector2(cell * tile_size) + Vector2(tile_size * 0.5, tile_size * 0.5)
 	set_facing(facing)
+	if _carried_sprite != null:
+		_carried_sprite.scale = Vector2(0.75, 0.75)
 
 func animate_move(target_cell: Vector2i, facing: Vector2i) -> void:
 	set_facing(facing)
 	_current_cell = target_cell
 	var target_pos := Vector2(target_cell * tile_size) + Vector2(tile_size * 0.5, tile_size * 0.5)
 	
-	if reduced_motion:
+	if reduced_motion or not is_inside_tree():
 		position = target_pos
+		move_completed.emit()
 		return
 		
-	if _active_tween and _active_tween.is_valid():
-		_active_tween.kill()
+	cancel_tweens()
 		
 	_active_tween = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	_active_tween.tween_property(self, ^"position", target_pos, move_duration)
+	_active_tween.tween_callback(func():
+		move_completed.emit()
+	)
+
+func animate_steal(target_cell: Vector2i = Vector2i.ZERO, block_color: int = 0) -> void:
+	if target_cell != Vector2i.ZERO:
+		set_facing(target_cell - _current_cell)
+	if _carried_sprite == null:
+		return
+	_carried_sprite.frame = clamp(block_color, 0, 4)
+	_carried_sprite.visible = true
+	
+	if reduced_motion or not is_inside_tree():
+		_carried_sprite.scale = Vector2(0.75, 0.75)
+		return
+		
+	_carried_sprite.scale = Vector2(0.1, 0.1)
+	var tw := create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_property(_carried_sprite, ^"scale", Vector2(0.75, 0.75), 0.12)
+
+func animate_placement(target_cell: Vector2i = Vector2i.ZERO) -> void:
+	if target_cell != Vector2i.ZERO:
+		set_facing(target_cell - _current_cell)
+	if _carried_sprite == null:
+		return
+		
+	if reduced_motion or not is_inside_tree():
+		_carried_sprite.visible = false
+		_carried_sprite.scale = Vector2(0.75, 0.75)
+		return
+		
+	if _carried_sprite.visible:
+		var tw := create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		tw.tween_property(_carried_sprite, ^"scale", Vector2(0.1, 0.1), 0.08)
+		tw.tween_callback(func():
+			if is_instance_valid(_carried_sprite):
+				_carried_sprite.visible = false
+				_carried_sprite.scale = Vector2(0.75, 0.75)
+		)
+	else:
+		_carried_sprite.visible = false
+
+func animate_invalid_bump(facing: Vector2i) -> void:
+	set_facing(facing)
+	if reduced_motion or not is_inside_tree():
+		return
+	if _active_tween and _active_tween.is_valid():
+		_active_tween.kill()
+		
+	var base_pos := Vector2(_current_cell * tile_size) + Vector2(tile_size * 0.5, tile_size * 0.5)
+	var bump_pos := base_pos + Vector2(facing) * 3.0
+	_active_tween = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_active_tween.tween_property(self, ^"position", bump_pos, 0.04)
+	_active_tween.chain().tween_property(self, ^"position", base_pos, 0.04)
 
 func update_carried_visual(carried_block: Dictionary) -> void:
 	if _carried_sprite == null:
@@ -75,4 +138,5 @@ func update_carried_visual(carried_block: Dictionary) -> void:
 		_carried_sprite.visible = false
 	else:
 		_carried_sprite.visible = true
-		_carried_sprite.frame = carried_block.get("color", 0)
+		_carried_sprite.frame = clamp(carried_block.get("color", 0), 0, 4)
+		_carried_sprite.scale = Vector2(0.75, 0.75)

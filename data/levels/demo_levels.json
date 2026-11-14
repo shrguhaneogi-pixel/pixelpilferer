@@ -1,0 +1,58 @@
+{
+  "chapter": 0,
+  "title": "Tutorial & Demo",
+  "palette_theme": "neon_night",
+  "levels": [
+    {
+      "id": "demo_01",
+      "name": "The Obstructed Path",
+      "hint": "Steal the obstructing block to clear your corridor to the exit.",
+      "width": 7,
+      "height": 5,
+      "layout": [
+        "#######",
+        "#P...E#",
+        "#######",
+        "#######",
+        "#######"
+      ],
+      "blocks": [
+        { "pos": [2, 1], "color": 0 }
+      ]
+    },
+    {
+      "id": "demo_02",
+      "name": "Chasm Bridge",
+      "hint": "Steal the block, place it into the void cell to create a bridge, and walk across to the exit.",
+      "width": 7,
+      "height": 5,
+      "layout": [
+        "#######",
+        "#P. .E#",
+        "#######",
+        "#######",
+        "#######"
+      ],
+      "blocks": [
+        { "pos": [2, 1], "color": 0 }
+      ]
+    },
+    {
+      "id": "demo_03",
+      "name": "Chromatic Socket",
+      "hint": "Steal the Cyan block and place it onto the glowing Cyan socket to unlock the exit portal.",
+      "width": 7,
+      "height": 5,
+      "layout": [
+        "#######",
+        "#P...E#",
+        "##1####",
+        "#######",
+        "#######"
+      ],
+      "blocks": [
+        { "pos": [2, 1], "color": 1 }
+      ]
+    }
+  ]
+}

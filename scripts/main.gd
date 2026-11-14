@@ -2,7 +2,7 @@ class_name MainGame extends Node2D
 
 ## Main entry orchestrator for Pixel Pilferer.
 
-var _current_chapter: int = 1
+var _current_chapter: int = 0
 var _current_level_idx: int = 0
 
 var game_controller: GameController
@@ -22,6 +22,7 @@ func _setup_subsystems() -> void:
 	game_controller.name = "GameController"
 	game_controller.level_completed.connect(_on_level_completed)
 	game_controller.turn_updated.connect(_on_turn_updated)
+	game_controller.state_updated.connect(_on_state_updated)
 	game_controller.hint_triggered.connect(_on_hint_triggered)
 	game_controller.menu_requested.connect(_show_chapter_select)
 	add_child(game_controller)
@@ -110,7 +111,8 @@ func _on_settings_closed(_settings: Dictionary) -> void:
 	_apply_saved_settings()
 
 func _start_adventure() -> void:
-	_load_specific_level(1, 0)
+	# Launching Start Adventure starts at Demo Level 0 (demo_01)
+	_load_specific_level(0, 0)
 
 func _load_specific_level(chapter_num: int, level_idx: int) -> void:
 	_current_chapter = chapter_num
@@ -131,14 +133,25 @@ func _load_specific_level(chapter_num: int, level_idx: int) -> void:
 	
 	if hud_node:
 		hud_node.visible = true
-		hud_node.set_level_info(lvl.get("name", "Untitled"), _current_chapter)
+		var title_str: String = ""
+		if _current_chapter == 0:
+			title_str = "Demo %d: %s" % [_current_level_idx + 1, lvl.get("name", "Untitled")]
+		else:
+			title_str = "Level %d-%d: %s" % [_current_chapter, _current_level_idx + 1, lvl.get("name", "Untitled")]
+		hud_node.set_level_info(title_str, _current_chapter)
 		hud_node.update_turn_count(0)
 		hud_node.hide_hint()
 		hud_node.hide_win()
+		if game_controller and game_controller.model:
+			hud_node.update_state(game_controller.model.get_state())
 
 func _on_turn_updated(turns: int) -> void:
 	if hud_node:
 		hud_node.update_turn_count(turns)
+
+func _on_state_updated(state: BoardState) -> void:
+	if hud_node:
+		hud_node.update_state(state)
 
 func _on_hint_triggered(hint_text: String) -> void:
 	if hud_node:
@@ -146,7 +159,7 @@ func _on_hint_triggered(hint_text: String) -> void:
 
 func _on_level_completed(turns: int) -> void:
 	var lvl: Dictionary = LevelRepository.load_level(_current_chapter, _current_level_idx)
-	var lvl_id: String = lvl.get("id", "ch1_01")
+	var lvl_id: String = lvl.get("id", "demo_01" if _current_chapter == 0 else "ch1_01")
 	
 	var next_id: String = ""
 	var ch_data := LevelRepository.load_chapter(_current_chapter)
@@ -154,6 +167,8 @@ func _on_level_completed(turns: int) -> void:
 	
 	if _current_level_idx + 1 < levels.size():
 		next_id = levels[_current_level_idx + 1]["id"]
+	elif _current_chapter == 0:
+		next_id = "ch1_01"
 	elif _current_chapter < 4:
 		next_id = "ch%d_01" % (_current_chapter + 1)
 		
@@ -167,6 +182,9 @@ func _advance_next_level() -> void:
 	
 	if _current_level_idx + 1 < levels.size():
 		_load_specific_level(_current_chapter, _current_level_idx + 1)
+	elif _current_chapter == 0:
+		# Advance from Demo (Chapter 0) to Chapter 1, Level 0
+		_load_specific_level(1, 0)
 	elif _current_chapter < 4:
 		_load_specific_level(_current_chapter + 1, 0)
 	else:

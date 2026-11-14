@@ -7,8 +7,9 @@ The testing suite guarantees that:
 2. No edge case allows illegal moves, illegal block placements, diagonal interactions, or carrying multiple blocks.
 3. Undo and Restart are 100% loss-free and restore exact historical states.
 4. States produce deterministic canonical hash keys for caching and solver state tracking regardless of internal block insertion order.
-5. Every single one of the 20 handcrafted levels is mathematically proven solvable via an admissible A* search heuristic.
-6. All GDScript code adheres to static typing and Godot 4.7.2 standards.
+5. Every single one of the 23 levels (20 campaign + 3 tutorial demo puzzles) is mathematically proven solvable via an admissible A* search heuristic.
+6. The presentation layer (`BoardRenderer`, `PlayerView`, `BlockView`, `HUD`) correctly visualizes model state without mutating domain logic.
+7. All GDScript code adheres to static typing and Godot 4.7.2 standards.
 
 ---
 
@@ -80,16 +81,45 @@ A 500-step random walk test with 10% undo probability asserting 5 physical invar
 
 ---
 
-## 5. Test Runners & Commands
+## 5. Phase 3 Playable Vertical Slice Verification
+
+### A. Rendering Pipeline & View State
+- **Terrain Tile Mapping:** Verified `TileMapLayer` sets Tile 0 (Floor), Tile 1 (Wall), Tile 2 (Void), and Tile 3 (Bridge over void).
+- **Socket Visual States:** Verified Frame 2 (Cyan Inactive) transitions to Frame 3 (Cyan Active) when matching block placed.
+- **Exit Portal States:** Verified Frame 0 (Locked arch) transitions to Frame 1 (Open radiant vortex) when win condition satisfied.
+- **Block Views:** Verified obstacle block (`z_index = 2`, `scale = (1, 1)`) vs bridge block (`z_index = 0`, `scale = (0.9, 0.9)`, tinted modulate).
+- **Player View:** Verified 4-way facing frames (South=0, East=1, North=2, West=3), carried sprite visibility/color, and invalid move bump feedback.
+
+### B. Input Handling & Buffering
+- **WASD & Shift + Direction:** Verified directional movement and adjacent interactions.
+- **Contextual Interact (E / Space):** Verified interaction in last faced direction.
+- **Mouse Cell Interaction:** Verified Manhattan distance translation for adjacent clicks.
+- **Input Buffering:** Verified 120ms buffer queues next action during active animation and auto-executes upon move completion.
+- **Undo / Restart Interruption:** Verified active tweens are immediately killed and view snaps to restored state.
+
+### C. HUD & Interface
+- **Carried-Fragment Indicator:** Displays "Glove: Empty" when empty and "Glove: [Color] Fragment" with color badge when holding a block.
+- **Socket Counter:** Formats as "No Sockets", "Sockets: X/Y", or "Sockets: Y/Y (Active)".
+- **Exit Status:** Formats as "Exit: LOCKED" vs "Exit: OPEN".
+- **Focus Safety:** All HUD buttons set to `focus_mode = FOCUS_NONE`.
+
+### D. Authored Demo Puzzles (100% Solvable)
+- **Demo A (`demo_01`):** "The Obstructed Path" — Solved in optimal 5 steps.
+- **Demo B (`demo_02`):** "Chasm Bridge" — Solved in optimal 6 steps.
+- **Demo C (`demo_03`):** "Chromatic Socket" — Solved in optimal 6 steps.
+
+---
+
+## 6. Test Runners & Commands
 
 ### Headless Godot 4.7.2 Suite
 ```powershell
 & "C:\Users\Dell\AppData\Local\Microsoft\WinGet\Packages\GodotEngine.GodotEngine_Microsoft.Winget.Source_8wekyb3d8bbwe\Godot_v4.7.2-stable_win64_console.exe" --headless --script res://tests/test_runner.gd
 ```
-- Runs 113 assertions covering scene loading, data structures, invariants, all 28 deterministic tests, demo scenario, 500-step fuzzing, invalid data error handling, and solver integration.
+- Runs **198 assertions** covering resource loading, data structures, invariants, all 28 deterministic tests, demo corridor scenario, 500-step fuzzing, board rendering, player animation & particles, block views, input handling & buffering, HUD upgrades, and sequential demo progression.
 
 ### Master Headless Runner (Python dual-harness)
 ```powershell
 python tests/run_tests.py
 ```
-- Runs 79 domain assertions + all 20 handcrafted levels verified solvable with A* search heuristic.
+- Runs 79 domain assertions, vertical slice demo verification, and all 23 levels verified solvable with A* search heuristic.

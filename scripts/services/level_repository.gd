@@ -3,6 +3,8 @@ class_name LevelRepository extends RefCounted
 ## Loads and validates level definitions from data/levels JSON resources.
 
 static func get_chapter_path(chapter_num: int) -> String:
+	if chapter_num == 0:
+		return "res://data/levels/demo_levels.json"
 	return "res://data/levels/ch%d_levels.json" % chapter_num
 
 static func load_chapter(chapter_num: int) -> Dictionary:
@@ -43,6 +45,9 @@ static func load_level(chapter_num: int, level_index: int) -> Dictionary:
 		return {}
 		
 	return lvl_dict
+
+static func load_demo_level(index: int) -> Dictionary:
+	return load_level(0, index)
 
 static func validate_level_dict(d: Dictionary) -> Dictionary:
 	if not d.has("id") or str(d["id"]).is_empty():

@@ -5,39 +5,95 @@
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_hud")
 
-[node name="TopBar" type="HBoxContainer" parent="."]
+[node name="TopPanel" type="PanelContainer" parent="."]
 anchors_preset = 10
 anchor_right = 1.0
-offset_left = 12.0
-offset_top = 8.0
-offset_right = -12.0
-offset_bottom = 36.0
+offset_left = 6.0
+offset_top = 4.0
+offset_right = -6.0
+offset_bottom = 58.0
 grow_horizontal = 2
 
-[node name="TitleLabel" type="Label" parent="TopBar"]
+[node name="Margin" type="MarginContainer" parent="TopPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 4
+
+[node name="VBox" type="VBoxContainer" parent="TopPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Row1" type="HBoxContainer" parent="TopPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TitleLabel" type="Label" parent="TopPanel/Margin/VBox/Row1"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Ch 1-1: First Steps"
+text = "Demo 1: The Obstructed Path"
 
-[node name="TurnLabel" type="Label" parent="TopBar"]
+[node name="MovesLabel" type="Label" parent="TopPanel/Margin/VBox/Row1"]
 layout_mode = 2
-text = "Turns: 0"
+text = "Moves: 0"
 
-[node name="UndoBtn" type="Button" parent="TopBar"]
+[node name="UndoBtn" type="Button" parent="TopPanel/Margin/VBox/Row1"]
 layout_mode = 2
+focus_mode = 0
 text = "Undo [Z]"
 
-[node name="RestartBtn" type="Button" parent="TopBar"]
+[node name="RestartBtn" type="Button" parent="TopPanel/Margin/VBox/Row1"]
 layout_mode = 2
+focus_mode = 0
 text = "Restart [R]"
 
-[node name="HintBtn" type="Button" parent="TopBar"]
+[node name="HintBtn" type="Button" parent="TopPanel/Margin/VBox/Row1"]
 layout_mode = 2
+focus_mode = 0
 text = "Hint [H]"
 
-[node name="MenuBtn" type="Button" parent="TopBar"]
+[node name="MenuBtn" type="Button" parent="TopPanel/Margin/VBox/Row1"]
 layout_mode = 2
+focus_mode = 0
 text = "Menu [Esc]"
+
+[node name="Row2" type="HBoxContainer" parent="TopPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="GloveSlot" type="HBoxContainer" parent="TopPanel/Margin/VBox/Row2"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="CarriedBlockRect" type="TextureRect" parent="TopPanel/Margin/VBox/Row2/GloveSlot"]
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+stretch_mode = 3
+
+[node name="GloveLabel" type="Label" parent="TopPanel/Margin/VBox/Row2/GloveSlot"]
+layout_mode = 2
+text = "Glove: Empty"
+
+[node name="VSeparator1" type="VSeparator" parent="TopPanel/Margin/VBox/Row2"]
+layout_mode = 2
+
+[node name="SocketsLabel" type="Label" parent="TopPanel/Margin/VBox/Row2"]
+layout_mode = 2
+text = "No Sockets"
+
+[node name="VSeparator2" type="VSeparator" parent="TopPanel/Margin/VBox/Row2"]
+layout_mode = 2
+
+[node name="ExitLabel" type="Label" parent="TopPanel/Margin/VBox/Row2"]
+layout_mode = 2
+text = "Exit: OPEN"
+
+[node name="ControlsHint" type="Label" parent="TopPanel/Margin/VBox/Row2"]
+layout_mode = 2
+size_flags_horizontal = 10
+theme_override_colors/font_color = Color(0.55, 0.6, 0.7, 0.8)
+text = "WASD: Move | Shift+Dir / Click: Steal/Place | E: Facing"
 
 [node name="HintPanel" type="PanelContainer" parent="."]
 visible = false
@@ -70,6 +126,7 @@ autowrap_mode = 2
 
 [node name="CloseBtn" type="Button" parent="HintPanel/MarginContainer/VBox"]
 layout_mode = 2
+focus_mode = 0
 text = "Close"
 
 [node name="WinModal" type="PanelContainer" parent="."]
@@ -105,16 +162,17 @@ horizontal_alignment = 1
 
 [node name="StatsLabel" type="Label" parent="WinModal/MarginContainer/VBox"]
 layout_mode = 2
-text = "Completed in 12 turns!"
+text = "Completed in 12 moves!"
 horizontal_alignment = 1
 
 [node name="NextBtn" type="Button" parent="WinModal/MarginContainer/VBox"]
 layout_mode = 2
+focus_mode = 0
 text = "Next Level"
 
-[connection signal="pressed" from="TopBar/UndoBtn" to="." method="_on_undo_button_pressed"]
-[connection signal="pressed" from="TopBar/RestartBtn" to="." method="_on_restart_button_pressed"]
-[connection signal="pressed" from="TopBar/HintBtn" to="." method="_on_hint_button_pressed"]
-[connection signal="pressed" from="TopBar/MenuBtn" to="." method="_on_menu_button_pressed"]
+[connection signal="pressed" from="TopPanel/Margin/VBox/Row1/UndoBtn" to="." method="_on_undo_button_pressed"]
+[connection signal="pressed" from="TopPanel/Margin/VBox/Row1/RestartBtn" to="." method="_on_restart_button_pressed"]
+[connection signal="pressed" from="TopPanel/Margin/VBox/Row1/HintBtn" to="." method="_on_hint_button_pressed"]
+[connection signal="pressed" from="TopPanel/Margin/VBox/Row1/MenuBtn" to="." method="_on_menu_button_pressed"]
 [connection signal="pressed" from="HintPanel/MarginContainer/VBox/CloseBtn" to="." method="_on_close_hint_pressed"]
 [connection signal="pressed" from="WinModal/MarginContainer/VBox/NextBtn" to="." method="_on_next_level_button_pressed"]

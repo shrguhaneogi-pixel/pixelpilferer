@@ -13,6 +13,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from test_domain_model import run_unit_tests
 from test_puzzle_solver import verify_all_levels
+from test_vertical_slice import run_vertical_slice_tests
 
 def main() -> int:
     print("=======================================================")
@@ -27,7 +28,15 @@ def main() -> int:
 
     print("\n")
 
-    # Step 2: Run all 20 level solvability proofs
+    # Step 2: Run vertical slice demo levels verification
+    demo_result = run_vertical_slice_tests()
+    if demo_result != 0:
+        print("\n[ERROR] Vertical slice demo levels verification failed!")
+        return 1
+
+    print("\n")
+
+    # Step 3: Run all 23 level solvability proofs
     levels_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "levels")
     solver_result = verify_all_levels(levels_dir)
     if not solver_result:
@@ -35,7 +44,7 @@ def main() -> int:
         return 1
 
     print("\n=======================================================")
-    print(" [ALL TESTS PASSED] Domain, rules, and all 20 levels OK ")
+    print(" [ALL TESTS PASSED] Domain, rules, and all 23 levels OK ")
     print("=======================================================")
     return 0
 
