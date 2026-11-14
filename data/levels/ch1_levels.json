@@ -1,0 +1,96 @@
+{
+  "chapter": 1,
+  "title": "The Stolen Street",
+  "palette_theme": "neon_night",
+  "levels": [
+    {
+      "id": "ch1_01",
+      "name": "First Steps",
+      "hint": "Steal the block from the wall alcove and place it onto the glowing socket.",
+      "width": 7,
+      "height": 5,
+      "layout": [
+        "#######",
+        "#...#E#",
+        "#P.S..#",
+        "#.....#",
+        "#######"
+      ],
+      "blocks": [
+        { "pos": [3, 1], "color": 0 }
+      ]
+    },
+    {
+      "id": "ch1_02",
+      "name": "Alley Shortcut",
+      "hint": "The corridor is blocked. Steal the obstacle to pass through, then place it in the socket.",
+      "width": 8,
+      "height": 5,
+      "layout": [
+        "########",
+        "#P....E#",
+        "#..#S..#",
+        "#..#...#",
+        "########"
+      ],
+      "blocks": [
+        { "pos": [3, 1], "color": 0 }
+      ]
+    },
+    {
+      "id": "ch1_03",
+      "name": "Void Cross",
+      "hint": "Drop a block into the void to create a bridge, cross over, steal it back from the other side, and activate the socket.",
+      "width": 8,
+      "height": 5,
+      "layout": [
+        "########",
+        "#..#S..#",
+        "#P. ..E#",
+        "#..#...#",
+        "########"
+      ],
+      "blocks": [
+        { "pos": [1, 1], "color": 0 }
+      ]
+    },
+    {
+      "id": "ch1_04",
+      "name": "Alleyway Duality",
+      "hint": "One block paves the way across the abyss; the other unlocks the exit.",
+      "width": 9,
+      "height": 6,
+      "layout": [
+        "#########",
+        "#P.....E#",
+        "#... ...#",
+        "#...#S..#",
+        "#...#...#",
+        "#########"
+      ],
+      "blocks": [
+        { "pos": [2, 1], "color": 0 },
+        { "pos": [1, 3], "color": 0 }
+      ]
+    },
+    {
+      "id": "ch1_05",
+      "name": "The Twin Locks",
+      "hint": "Both sockets must be powered simultaneously. Plan your steps to avoid boxing yourself in.",
+      "width": 9,
+      "height": 6,
+      "layout": [
+        "#########",
+        "#P.S...E#",
+        "#..#.#..#",
+        "#..S....#",
+        "#.......#",
+        "#########"
+      ],
+      "blocks": [
+        { "pos": [2, 3], "color": 0 },
+        { "pos": [6, 3], "color": 0 }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,100 @@
+{
+  "chapter": 3,
+  "title": "The Forgotten Vault",
+  "palette_theme": "amber_vault",
+  "levels": [
+    {
+      "id": "ch3_01",
+      "name": "Amber Awakening",
+      "hint": "Ancient mechanisms hum. This golden socket demands an Amber fragment to activate.",
+      "width": 8,
+      "height": 5,
+      "layout": [
+        "########",
+        "#P....E#",
+        "#..#2..#",
+        "#..#...#",
+        "########"
+      ],
+      "blocks": [
+        { "pos": [3, 1], "color": 2 }
+      ]
+    },
+    {
+      "id": "ch3_02",
+      "name": "Spectrum Split",
+      "hint": "The Amber socket rejects standard stone. Ensure each block finds its true match.",
+      "width": 9,
+      "height": 5,
+      "layout": [
+        "#########",
+        "#P.S...E#",
+        "#..#2#..#",
+        "#.......#",
+        "#########"
+      ],
+      "blocks": [
+        { "pos": [2, 3], "color": 0 },
+        { "pos": [6, 3], "color": 2 }
+      ]
+    },
+    {
+      "id": "ch3_03",
+      "name": "Tight Quarter Exchange",
+      "hint": "In close confines, blocks can easily become immovable barriers. Think two steps ahead.",
+      "width": 9,
+      "height": 6,
+      "layout": [
+        "#########",
+        "#P.2...E#",
+        "#..#.#..#",
+        "#..2....#",
+        "#.......#",
+        "#########"
+      ],
+      "blocks": [
+        { "pos": [2, 3], "color": 2 },
+        { "pos": [6, 3], "color": 2 }
+      ]
+    },
+    {
+      "id": "ch3_04",
+      "name": "The Vault Siphon",
+      "hint": "Use the spare fragment to construct a pathway to reach the sealed inner conduit.",
+      "width": 9,
+      "height": 6,
+      "layout": [
+        "#########",
+        "#P.. ..E#",
+        "#...#...#",
+        "#.. .2..#",
+        "#...#...#",
+        "#########"
+      ],
+      "blocks": [
+        { "pos": [1, 2], "color": 0 },
+        { "pos": [3, 4], "color": 2 }
+      ]
+    },
+    {
+      "id": "ch3_05",
+      "name": "The Triad Conduit",
+      "hint": "Three energy nodes guard the chamber exit. Harmonize the amber conduits with precision.",
+      "width": 10,
+      "height": 6,
+      "layout": [
+        "##########",
+        "#P... ..E#",
+        "#.#..#2..#",
+        "#... .#..#",
+        "#..#..S..#",
+        "##########"
+      ],
+      "blocks": [
+        { "pos": [2, 1], "color": 2 },
+        { "pos": [1, 3], "color": 0 },
+        { "pos": [6, 1], "color": 2 }
+      ]
+    }
+  ]
+}

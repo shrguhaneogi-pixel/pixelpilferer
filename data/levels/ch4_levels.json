@@ -1,0 +1,104 @@
+{
+  "chapter": 4,
+  "title": "The Chromatic Core",
+  "palette_theme": "chromatic_core",
+  "levels": [
+    {
+      "id": "ch4_01",
+      "name": "Neon Spectrum",
+      "hint": "Cyan and Magenta conduits awaken. Deliver each spectral fragment to its twin node.",
+      "width": 9,
+      "height": 5,
+      "layout": [
+        "#########",
+        "#P.1...E#",
+        "#..#3#..#",
+        "#.......#",
+        "#########"
+      ],
+      "blocks": [
+        { "pos": [2, 3], "color": 1 },
+        { "pos": [6, 3], "color": 3 }
+      ]
+    },
+    {
+      "id": "ch4_02",
+      "name": "Emerald Gate",
+      "hint": "Emerald fragments resonate at high frequency. Guide both emerald and amber safely.",
+      "width": 9,
+      "height": 6,
+      "layout": [
+        "#########",
+        "#P.4...E#",
+        "#..#.#..#",
+        "#..2....#",
+        "#.......#",
+        "#########"
+      ],
+      "blocks": [
+        { "pos": [2, 3], "color": 4 },
+        { "pos": [6, 3], "color": 2 }
+      ]
+    },
+    {
+      "id": "ch4_03",
+      "name": "The Rainbow Bridge",
+      "hint": "Three colors guard the chasm. Bridge the divide, transfer the payload, and illuminate the core.",
+      "width": 9,
+      "height": 6,
+      "layout": [
+        "#########",
+        "#P.. ..E#",
+        "#...#...#",
+        "#.. .1..#",
+        "#3..#..4#",
+        "#########"
+      ],
+      "blocks": [
+        { "pos": [1, 2], "color": 3 },
+        { "pos": [3, 4], "color": 1 },
+        { "pos": [7, 4], "color": 4 }
+      ]
+    },
+    {
+      "id": "ch4_04",
+      "name": "Chromatic Labyrinth",
+      "hint": "Three distinct frequencies must be aligned. Avoid blocking secondary corridors with early placements.",
+      "width": 9,
+      "height": 5,
+      "layout": [
+        "#########",
+        "#P.1...E#",
+        "#..#2#3.#",
+        "#.......#",
+        "#########"
+      ],
+      "blocks": [
+        { "pos": [1, 3], "color": 1 },
+        { "pos": [3, 3], "color": 2 },
+        { "pos": [6, 3], "color": 3 }
+      ]
+    },
+    {
+      "id": "ch4_05",
+      "name": "The Core Chamber",
+      "hint": "The heart of reality. All four chromatic fragments must find their sacred pedestals.",
+      "width": 9,
+      "height": 6,
+      "layout": [
+        "#########",
+        "#P.1...E#",
+        "#..#2#..#",
+        "#..3#4..#",
+        "#.......#",
+        "#########"
+      ],
+      "blocks": [
+        { "pos": [1, 2], "color": 1 },
+        { "pos": [1, 4], "color": 2 },
+        { "pos": [6, 2], "color": 3 },
+        { "pos": [6, 4], "color": 4 }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+#!/usr/bin/env python3
+"""
+Pixel Pilferer Master Headless Test Runner
+Executes domain invariant tests, rule checks, and all 20 level solvability proofs.
+Exits with 0 on full success, 1 on any failure.
+"""
+
+import sys
+import os
+
+# Add tests directory to python path
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from test_domain_model import run_unit_tests
+from test_puzzle_solver import verify_all_levels
+
+def main() -> int:
+    print("=======================================================")
+    print("         PIXEL PILFERER AUTOMATED TEST SUITE           ")
+    print("=======================================================\n")
+
+    # Step 1: Run domain model unit tests
+    unit_result = run_unit_tests()
+    if unit_result != 0:
+        print("\n[ERROR] Domain invariant tests failed!")
+        return 1
+
+    print("\n")
+
+    # Step 2: Run all 20 level solvability proofs
+    levels_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "levels")
+    solver_result = verify_all_levels(levels_dir)
+    if not solver_result:
+        print("\n[ERROR] Level solvability verification failed!")
+        return 1
+
+    print("\n=======================================================")
+    print(" [ALL TESTS PASSED] Domain, rules, and all 20 levels OK ")
+    print("=======================================================")
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main())
