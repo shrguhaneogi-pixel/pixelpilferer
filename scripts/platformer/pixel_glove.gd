@@ -90,7 +90,9 @@ func try_interact() -> bool:
 
 		var color: int = player.carried_block.get("color", 0)
 		var symbol: String = player.carried_block.get("symbol", "◆")
-		tile_manager.create_block(cell, color, symbol)
+		var fragment = player.carried_block.get("fragment", null)
+		var is_socket: bool = tile_manager.is_socket_cell(cell)
+		tile_manager.create_block(cell, color, symbol, fragment, is_socket)
 
 		player.carried_block = null
 		place_success.emit(cell, color)

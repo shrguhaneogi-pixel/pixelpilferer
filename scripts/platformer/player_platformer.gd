@@ -4,6 +4,7 @@ class_name PlayerPlatformer extends CharacterBody2D
 signal jumped()
 signal landed()
 signal died()
+signal bounced(launch_velocity: float)
 signal block_stolen(color: int)
 signal block_placed(color: int, cell: Vector2i)
 signal aim_changed(aim_cell: Vector2i)
@@ -152,6 +153,15 @@ func _physics_process(delta: float) -> void:
 	was_on_floor = is_on_floor()
 	move_and_slide()
 
+	# 9b. Check landing on spring platforms
+	if is_on_floor():
+		for i in range(get_slide_collision_count()):
+			var col = get_slide_collision(i)
+			if col.get_normal().y < -0.7:
+				var collider = col.get_collider()
+				if collider != null and collider.has_method("on_player_landed"):
+					collider.on_player_landed(self)
+
 	# 10. Interact with Pixel Glove
 	if interact_pressed:
 		if glove and glove.has_method("try_interact"):
@@ -167,6 +177,13 @@ func execute_jump() -> void:
 	jump_buffer_timer = 0.0
 	is_jumping = true
 	jumped.emit()
+
+func bounce(launch_velocity: float = -370.0) -> void:
+	velocity.y = launch_velocity
+	coyote_timer = 0.0
+	jump_buffer_timer = 0.0
+	is_jumping = true
+	bounced.emit(launch_velocity)
 
 func die() -> void:
 	velocity = Vector2.ZERO

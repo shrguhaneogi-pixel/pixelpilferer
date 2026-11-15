@@ -1,0 +1,29 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/platformer/movable_fragment_2d.gd" id="1_frag"]
+[ext_resource type="Texture2D" path="res://assets/sprites/blocks.png" id="2_block_tex"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_block"]
+size = Vector2(16, 16)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_sensor"]
+size = Vector2(14, 4)
+
+[node name="MovableFragment2D" type="StaticBody2D"]
+collision_layer = 2
+collision_mask = 1
+script = ExtResource("1_frag")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_block")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_block_tex")
+
+[node name="SpringSensor" type="Area2D" parent="."]
+collision_layer = 4
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SpringSensor"]
+position = Vector2(0, -8)
+shape = SubResource("RectangleShape2D_sensor")

@@ -108,6 +108,8 @@ func setup_connections() -> void:
 			cs.collected.connect(_on_shard_collected)
 
 	for sk in sockets:
+		if tile_manager:
+			tile_manager.register_socket_cell(sk.grid_cell)
 		if not sk.satisfaction_changed.is_connected(_on_socket_satisfaction_changed):
 			sk.satisfaction_changed.connect(_on_socket_satisfaction_changed)
 

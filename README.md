@@ -19,10 +19,10 @@
 - **Chromatic Sockets & Conduits:**
   - **Neutral Sockets (`✚`):** Activated by any block.
   - **Colored Sockets:** Require an exact chromatic and rune match:
-    - Cyan (`◆`)
-    - Amber (`▲`)
-    - Magenta (`■`)
-    - Emerald (`●`)
+	- Cyan (`◆`)
+	- Amber (`▲`)
+	- Magenta (`■`)
+	- Emerald (`●`)
 - **Exit Portal:** Unlocked and energized only when every required socket in the chamber is satisfied.
 - **Lossless Deterministic History:**
   - **Undo (`Z`):** Rewinds the exact prior state losslessly ($S_t \to S_{t-1}$).

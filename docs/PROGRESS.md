@@ -75,3 +75,16 @@
 | **Milestone F** | Complete Campaign | *Pending* | 20 handcrafted platformer campaign levels across 4 worlds. |
 | **Milestone G** | Accessibility, Menus, Saves & Export | *Pending* | Main menu, pause, level select, progress persistence, desktop/web release packaging. |
 
+---
+
+## 5. Pixel Pilferer: Rebound — Game Jam Theme Integration (BOUNCE BACK)
+
+| Feature / Milestone | Scope | Status | Notes |
+| :--- | :--- | :---: | :--- |
+| **Reality Snapback Architecture** | 6-State Fragment Engine | **COMPLETE** | Implemented `MovableFragment2D` with explicit state machine (`HOME`, `CARRIED`, `PLACED`, `TRIGGERED`, `RETURNING`, `ANCHORED`), spring launch impulse (`-370.0 px/s`), squash & stretch tweening, and return flight. |
+| **Ghost Frame System** | Environmental Memory | **COMPLETE** | Implemented `GhostFrame2D` rendering pulsating dashed outlines and rune glyphs at stolen home cells. |
+| **Safety Protocols** | Collision & Restoration Safety | **COMPLETE** | Instantaneous collision removal on snapback launch; safe deferred restoration protocol if home cell is obstructed by player (zero character overlap/stuck bugs). |
+| **Dual Resource Role** | Spring vs. Socket Anchoring | **COMPLETE** | Fragments placed into sockets enter `ANCHORED` mode (solid puzzle conduits, zero bounce/snapback), creating meaningful resource dilemmas. |
+| **11-Step Vertical Slice** | "Rebound: The Stolen Spring" | **COMPLETE** | Handcrafted test scene `rebound_vertical_slice.tscn` verifying all 11 acceptance steps and 3 critical edge cases (side collision rejection, deferred overlap restoration, socket anchoring) in `test_rebound_vertical_slice.gd` (32/32 PASS). |
+
+
