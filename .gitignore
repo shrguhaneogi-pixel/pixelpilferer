@@ -4,6 +4,7 @@
 
 # Exported binaries & templates
 build/
+dist/
 bin/
 *.apk
 *.aab
@@ -14,6 +15,8 @@ bin/
 # Editor and temporary files
 *.tmp
 *.log
+.save_cache.json
+.save_cache.bak
 .import/
 export_credentials.cfg
 

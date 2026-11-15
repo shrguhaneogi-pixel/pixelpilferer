@@ -5,6 +5,8 @@ class_name ProgressService extends RefCounted
 
 const SAVE_PATH = "user://pixel_save.json"
 const BACKUP_PATH = "user://pixel_save.bak"
+const FALLBACK_SAVE_PATH = "res://.save_cache.json"
+const FALLBACK_BACKUP_PATH = "res://.save_cache.bak"
 const SCHEMA_VERSION = 1
 
 ## Authoritative minimal optimal move targets verified by BFS/A* solver
@@ -47,6 +49,7 @@ const TUTORIAL_TEXTS: Dictionary = {
 }
 
 static var _cached_data: Dictionary = {}
+static var _using_fallback: bool = false
 
 static func _get_default_data() -> Dictionary:
 	return {
@@ -84,11 +87,23 @@ static func load_progress() -> Dictionary:
 		
 	var default_data := _get_default_data()
 	
-	if not FileAccess.file_exists(SAVE_PATH):
-		_cached_data = default_data.duplicate(true)
-		return _cached_data
+	var path_to_load := SAVE_PATH
+	if _using_fallback and FileAccess.file_exists(FALLBACK_SAVE_PATH):
+		path_to_load = FALLBACK_SAVE_PATH
+	elif not FileAccess.file_exists(SAVE_PATH):
+		if FileAccess.file_exists(FALLBACK_SAVE_PATH):
+			path_to_load = FALLBACK_SAVE_PATH
+		else:
+			_cached_data = default_data.duplicate(true)
+			return _cached_data
+	elif FileAccess.file_exists(FALLBACK_SAVE_PATH):
+		if FileAccess.get_modified_time(FALLBACK_SAVE_PATH) > FileAccess.get_modified_time(SAVE_PATH):
+			path_to_load = FALLBACK_SAVE_PATH
 		
-	var file := FileAccess.open(SAVE_PATH, FileAccess.READ)
+	var file := FileAccess.open(path_to_load, FileAccess.READ)
+	if file == null and path_to_load == SAVE_PATH and FileAccess.file_exists(FALLBACK_SAVE_PATH):
+		path_to_load = FALLBACK_SAVE_PATH
+		file = FileAccess.open(FALLBACK_SAVE_PATH, FileAccess.READ)
 	if file == null:
 		_cached_data = default_data.duplicate(true)
 		return _cached_data
@@ -122,6 +137,8 @@ static func _validate_save_dict(d: Dictionary) -> bool:
 
 static func _backup_corrupted_save(raw_content: String) -> void:
 	var backup_file := FileAccess.open(BACKUP_PATH, FileAccess.WRITE)
+	if backup_file == null:
+		backup_file = FileAccess.open(FALLBACK_BACKUP_PATH, FileAccess.WRITE)
 	if backup_file != null:
 		backup_file.store_string(raw_content)
 		backup_file.close()
@@ -131,6 +148,9 @@ static func save_progress(data: Dictionary) -> void:
 		data["schema_version"] = SCHEMA_VERSION
 	_cached_data = data.duplicate(true)
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+	if file == null:
+		_using_fallback = true
+		file = FileAccess.open(FALLBACK_SAVE_PATH, FileAccess.WRITE)
 	if file != null:
 		file.store_string(JSON.stringify(data, "\t"))
 		file.close()

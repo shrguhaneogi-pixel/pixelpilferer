@@ -83,20 +83,31 @@ func play_sfx(sfx_name: StringName) -> void:
 		if is_inside_tree() and player.is_inside_tree():
 			player.play()
 
-func play_steal() -> void: play_sfx(&"steal")
-func play_place() -> void: play_sfx(&"place")
-func play_socket() -> void: play_sfx(&"socket")
+func play_steal() -> void:
+	if _players.has(&"steal"):
+		_players[&"steal"].pitch_scale = randf_range(0.97, 1.03)
+	play_sfx(&"steal")
+
+func play_place() -> void:
+	if _players.has(&"place"):
+		_players[&"place"].pitch_scale = randf_range(0.97, 1.03)
+	play_sfx(&"place")
+
+func play_socket() -> void:
+	play_sfx(&"socket")
+
 func play_step() -> void:
 	if _players.has(&"step"):
-		var p: AudioStreamPlayer = _players[&"step"]
-		p.pitch_scale = 1.0
+		_players[&"step"].pitch_scale = randf_range(0.95, 1.05)
 	play_sfx(&"step")
+
 func play_undo() -> void: play_sfx(&"undo")
 func play_win() -> void: play_sfx(&"win")
 func play_bump() -> void:
 	if not sfx_enabled:
 		return
 	if _players.has(&"bump"):
+		_players[&"bump"].pitch_scale = randf_range(0.94, 1.04)
 		play_sfx(&"bump")
 	elif _players.has(&"step"):
 		var player: AudioStreamPlayer = _players[&"step"]

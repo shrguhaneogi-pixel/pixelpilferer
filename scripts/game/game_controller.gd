@@ -154,14 +154,26 @@ func _unhandled_input(event: InputEvent) -> void:
 				var diff: Vector2i = clicked_cell - state.player_pos
 				var manhattan: int = abs(diff.x) + abs(diff.y)
 				if manhattan == 1:
-					if diff == Constants.DIR_NORTH:
-						action = Constants.ActionType.INTERACT_NORTH
-					elif diff == Constants.DIR_EAST:
-						action = Constants.ActionType.INTERACT_EAST
-					elif diff == Constants.DIR_SOUTH:
-						action = Constants.ActionType.INTERACT_SOUTH
-					elif diff == Constants.DIR_WEST:
-						action = Constants.ActionType.INTERACT_WEST
+					var is_block_present: bool = state.blocks.has(clicked_cell) and not state.is_bridge_at(clicked_cell)
+					var should_move: bool = not state.is_carrying() and not is_block_present and state.is_walkable(clicked_cell)
+					if should_move:
+						if diff == Constants.DIR_NORTH:
+							action = Constants.ActionType.MOVE_NORTH
+						elif diff == Constants.DIR_EAST:
+							action = Constants.ActionType.MOVE_EAST
+						elif diff == Constants.DIR_SOUTH:
+							action = Constants.ActionType.MOVE_SOUTH
+						elif diff == Constants.DIR_WEST:
+							action = Constants.ActionType.MOVE_WEST
+					else:
+						if diff == Constants.DIR_NORTH:
+							action = Constants.ActionType.INTERACT_NORTH
+						elif diff == Constants.DIR_EAST:
+							action = Constants.ActionType.INTERACT_EAST
+						elif diff == Constants.DIR_SOUTH:
+							action = Constants.ActionType.INTERACT_SOUTH
+						elif diff == Constants.DIR_WEST:
+							action = Constants.ActionType.INTERACT_WEST
 		
 	if action != -1:
 		request_action(action)

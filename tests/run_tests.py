@@ -16,6 +16,7 @@ from test_puzzle_solver import verify_all_levels
 from test_vertical_slice import run_vertical_slice_tests
 from test_solver_validation import run_solver_validation_tests
 from test_adversarial_qa import run_adversarial_suite
+from test_final_release_verification import run_release_verification
 
 def main() -> int:
     print("=======================================================")
@@ -61,8 +62,16 @@ def main() -> int:
         print("\n[ERROR] Phase 8 Adversarial QA tests failed!")
         return 1
 
+    print("\n")
+
+    # Step 6: Run Phase 9 Final Release & Delivery Verification Suite
+    p9_ok = run_release_verification()
+    if not p9_ok:
+        print("\n[ERROR] Phase 9 Final Release Verification failed!")
+        return 1
+
     print("\n=======================================================")
-    print(" [ALL TESTS PASSED] Domain, rules, solver, & QA audit OK")
+    print(" [ALL TESTS PASSED] Domain, rules, solver, QA & release OK")
     print("=======================================================")
     return 0
 

@@ -10,7 +10,9 @@
 | **Phase 4** | Puzzle Solver & Level Validation | **COMPLETE** | BFS & A* solver engine, schema validator, solution replay verifier, and contextual hint generator. |
 | **Phase 5** | Complete Campaign & Puzzle Design | **COMPLETE** | 20 campaign levels across 4 chapters with strict pedagogical curriculum, 100% solver-verified solvability, progression persistence, and restoration victory flow. |
 | **Phase 6** | Art Direction, Animation, Audio & Settings | **COMPLETE** | 16x16 pixel sprites (Pip with visor/idle bob, chromatic blocks with tactile runes, chapter-themed palettes, void/bridges), 11 original synthesized WAV retro audio tracks (including 12s ambient BGM), particle glove interactions, accessibility settings (Reduced Motion, Screen Shake, Volume sliders). |
-| **Phase 7** | Platform Export & Final Release | **NEXT** | HTML5 Web single-thread export, Windows desktop package, and release distribution verification. |
+| **Phase 7** | UI, UX, Progression & Persistence | **COMPLETE** | Full title screen (Continue, New Game confirm modal, Credits), Chapter Select with medal badges (★, ◈, •), in-game HUD, pause menu, and versioned save system with corrupted backup recovery. |
+| **Phase 8** | Adversarial QA & Reliability Audit | **COMPLETE** | 10,000-step randomized fuzzing across seeds 42, 1337, 2026, 9999 (0 invariant violations), solver micro-fixture validation, 50-cycle steal/place stress tests, and verified quality audit report (`docs/QUALITY_AUDIT.md`). |
+| **Phase 9** | Final Release, Export & Delivery | **COMPLETE** | Desktop release package (`build/desktop/PixelPilferer.exe`, `PixelPilferer.pck`), standalone release zip (`dist/PixelPilferer_Windows_v1.0.0.zip`), 100% solver verification across all 23 levels, context-aware mouse/touch control upgrade, subtle audio pitch variation, and release report (`docs/RELEASE_REPORT.md`). |
 
 ---
 

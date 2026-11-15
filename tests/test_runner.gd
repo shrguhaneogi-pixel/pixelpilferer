@@ -24,6 +24,7 @@ func _init() -> void:
 	_test_phase6_art_animation_audio()
 	_test_phase7_ui_progression_persistence()
 	_test_phase8_adversarial_qa()
+	_test_phase9_final_release_verification()
 	
 	print("\n-------------------------------------------")
 	print("Total tests executed: %d | Failed: %d" % [_total_tests, _failed_tests])
@@ -1630,6 +1631,109 @@ func _test_phase8_adversarial_qa() -> void:
 	for br: BoardRenderer in renderers:
 		br.queue_free()
 	_assert_true(true, "Repeated BoardRenderer allocation and disposal executed cleanly")
+
+func _test_phase9_final_release_verification() -> void:
+	print("\n=== 13. Verifying Phase 9 Final Release, Shipping Lifecycle & Packaging ===")
+	
+	# 1. Main Scene & Component Assembly Integrity
+	var main_scene: PackedScene = ResourceLoader.load("res://scenes/main.tscn")
+	_assert_true(main_scene != null, "Main scene resource is valid and loadable")
+	var main_node: Node = main_scene.instantiate()
+	_assert_true(main_node != null, "Main scene instantiates cleanly")
+	main_node._ready()
+	_assert_true(main_node.has_node("GameCanvas/TitleScreen") or (main_node as MainGame).title_screen != null, "Main scene initializes TitleScreen")
+	main_node.queue_free()
+
+	# 2. Critical Asset Manifest Existence
+	var assets_to_verify: Array[String] = [
+		"res://data/levels/demo_levels.json",
+		"res://data/levels/ch1_levels.json",
+		"res://data/levels/ch2_levels.json",
+		"res://data/levels/ch3_levels.json",
+		"res://data/levels/ch4_levels.json",
+		"res://assets/sprites/pip.png",
+		"res://assets/sprites/blocks.png",
+		"res://assets/sprites/tileset.png",
+		"res://assets/sprites/exit_portal.png",
+		"res://assets/sprites/icon.png",
+		"res://assets/audio/music_ambient.wav",
+		"res://assets/audio/sfx_steal.wav",
+		"res://assets/audio/sfx_place.wav",
+		"res://assets/audio/sfx_bump.wav",
+		"res://assets/audio/sfx_socket.wav",
+		"res://assets/audio/sfx_win.wav"
+	]
+	var all_assets_present := true
+	for path in assets_to_verify:
+		if not ResourceLoader.exists(path) and not FileAccess.file_exists(path):
+			all_assets_present = false
+			printerr("Missing shipping asset: ", path)
+			break
+	_assert_true(all_assets_present, "All 16 shipping runtime assets verified in virtual filesystem")
+
+	# 3. Progression Chain from Chapter 1 through Chapter 4 Finale
+	ProgressService.reset_progress()
+	var cont_target: Dictionary = ProgressService.get_continue_target()
+	_assert_eq(cont_target.get("level_id", ""), "ch1_01", "Reset progress targets ch1_01")
+	
+	# Simulate completing Chapter 1
+	for i in range(1, 6):
+		var lid := "ch1_0%d" % i
+		var next_lid := "ch1_0%d" % (i + 1) if i < 5 else "ch2_01"
+		ProgressService.record_level_completion(lid, 6, next_lid)
+	_assert_eq(ProgressService.get_chapter_completed_count(1), 5, "Chapter 1 completed count is 5/5")
+	_assert_true(ProgressService.is_chapter_completed(1), "Chapter 1 is marked completed")
+	_assert_true(ProgressService.is_level_unlocked(2, 0), "Completing ch1 unlocks ch2_01")
+
+	# Simulate completing Chapter 2
+	for i in range(1, 6):
+		var lid := "ch2_0%d" % i
+		var next_lid := "ch2_0%d" % (i + 1) if i < 5 else "ch3_01"
+		ProgressService.record_level_completion(lid, 8, next_lid)
+	_assert_eq(ProgressService.get_chapter_completed_count(2), 5, "Chapter 2 completed count is 5/5")
+	_assert_true(ProgressService.is_chapter_completed(2), "Chapter 2 is marked completed")
+	_assert_true(ProgressService.is_level_unlocked(3, 0), "Completing ch2 unlocks ch3_01")
+
+	# Simulate completing Chapter 3
+	for i in range(1, 6):
+		var lid := "ch3_0%d" % i
+		var next_lid := "ch3_0%d" % (i + 1) if i < 5 else "ch4_01"
+		ProgressService.record_level_completion(lid, 10, next_lid)
+	_assert_eq(ProgressService.get_chapter_completed_count(3), 5, "Chapter 3 completed count is 5/5")
+	_assert_true(ProgressService.is_chapter_completed(3), "Chapter 3 is marked completed")
+	_assert_true(ProgressService.is_level_unlocked(4, 0), "Completing ch3 unlocks ch4_01")
+
+	# Simulate completing Chapter 4 through Grand Core finale
+	for i in range(1, 6):
+		var lid := "ch4_0%d" % i
+		var next_lid := "ch4_0%d" % (i + 1) if i < 5 else ""
+		ProgressService.record_level_completion(lid, 12, next_lid)
+	_assert_eq(ProgressService.get_chapter_completed_count(4), 5, "Chapter 4 completed count is 5/5")
+	_assert_true(ProgressService.is_level_completed("ch4_05"), "Grand Core (ch4_05) marked completed")
+	_assert_true(ProgressService.is_campaign_completed(), "is_campaign_completed is true after Grand Core")
+
+	# 4. Save Persistence to Disk & Reload
+	var cur_data := ProgressService.load_progress()
+	ProgressService.save_progress(cur_data)
+	var file_persisted := FileAccess.file_exists(ProgressService.SAVE_PATH) or FileAccess.file_exists(ProgressService.FALLBACK_SAVE_PATH)
+	_assert_true(file_persisted, "Save data persisted to disk (SAVE_PATH or FALLBACK_SAVE_PATH)")
+	
+	# Clear cache and reload from disk
+	ProgressService._cached_data = {}
+	var reloaded_data := ProgressService.load_progress()
+	_assert_true(ProgressService.is_campaign_completed(), "Reloaded save file preserves campaign completed state")
+	_assert_eq(ProgressService.get_level_best_turns("ch4_05"), 12, "Reloaded save file preserves Grand Core best turns")
+
+	# 5. Settings & Accessibility Toggle Persistence
+	ProgressService.set_setting("screen_shake", false)
+	ProgressService.set_setting("reduced_motion", true)
+	ProgressService.set_setting("music_volume", 0.4)
+	
+	ProgressService._cached_data = {}
+	_assert_true(not ProgressService.get_setting("screen_shake", true), "Screen shake persisted as false")
+	_assert_true(ProgressService.get_setting("reduced_motion", false), "Reduced motion persisted as true")
+	_assert_eq(ProgressService.get_setting("music_volume", 1.0), 0.4, "Music volume persisted as 0.4")
+
 
 
 

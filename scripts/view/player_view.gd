@@ -138,8 +138,10 @@ func animate_steal(target_cell: Vector2i = Vector2i.ZERO, block_color: int = 0) 
 		set_facing(target_cell - _current_cell)
 	if _carried_sprite == null:
 		return
-	_carried_sprite.frame = clamp(block_color, 0, 4)
+	var col_idx: int = clamp(block_color, 0, 4)
+	_carried_sprite.frame = col_idx
 	_carried_sprite.visible = true
+	_apply_energy_tint(col_idx)
 	
 	if reduced_motion or not is_inside_tree():
 		_carried_sprite.scale = Vector2(0.75, 0.75)
@@ -154,6 +156,7 @@ func animate_placement(target_cell: Vector2i = Vector2i.ZERO) -> void:
 		set_facing(target_cell - _current_cell)
 	if _carried_sprite == null:
 		return
+	_apply_energy_tint(-1)
 		
 	if reduced_motion or not is_inside_tree():
 		_carried_sprite.visible = false
@@ -209,7 +212,29 @@ func update_carried_visual(carried_block: Dictionary) -> void:
 		
 	if carried_block.is_empty():
 		_carried_sprite.visible = false
+		_apply_energy_tint(-1)
 	else:
 		_carried_sprite.visible = true
-		_carried_sprite.frame = clamp(carried_block.get("color", 0), 0, 4)
+		var col_idx: int = clamp(carried_block.get("color", 0), 0, 4)
+		_carried_sprite.frame = col_idx
 		_carried_sprite.scale = Vector2(0.75, 0.75)
+		_apply_energy_tint(col_idx)
+
+func _apply_energy_tint(col_idx: int) -> void:
+	if _sprite == null:
+		return
+	if col_idx < 0:
+		_sprite.self_modulate = Color(1.0, 1.0, 1.0)
+		return
+		
+	match col_idx:
+		Constants.BlockColor.CYAN:
+			_sprite.self_modulate = Color(0.92, 1.08, 1.1)
+		Constants.BlockColor.AMBER:
+			_sprite.self_modulate = Color(1.1, 1.04, 0.92)
+		Constants.BlockColor.MAGENTA:
+			_sprite.self_modulate = Color(1.1, 0.92, 1.05)
+		Constants.BlockColor.EMERALD:
+			_sprite.self_modulate = Color(0.92, 1.1, 1.0)
+		_:
+			_sprite.self_modulate = Color(1.05, 1.05, 1.08)
