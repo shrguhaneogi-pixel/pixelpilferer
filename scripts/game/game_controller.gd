@@ -146,7 +146,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
 		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
-			if renderer != null:
+			if renderer != null and renderer.is_inside_tree():
 				var local_mouse_pos: Vector2 = renderer.get_local_mouse_position()
 				var cell_x: int = int(floor(local_mouse_pos.x / float(tile_size)))
 				var cell_y: int = int(floor(local_mouse_pos.y / float(tile_size)))

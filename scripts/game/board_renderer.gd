@@ -32,6 +32,7 @@ var terrain_tileset: TileSet
 var socket_tileset: TileSet
 var _last_carried_empty: bool = true
 var _last_portal_open: bool = false
+var _portal_tween: Tween = null
 
 func _ready() -> void:
 	if terrain_tileset == null or socket_tileset == null:
@@ -272,10 +273,12 @@ func update_view(state: BoardState, snap: bool = false) -> void:
 	_last_carried_empty = not state.is_carrying()
 
 func _animate_portal_open() -> void:
+	if _portal_tween and _portal_tween.is_valid():
+		_portal_tween.kill()
 	exit_sprite.scale = Vector2(0.6, 0.6)
-	var tw := create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	tw.tween_property(exit_sprite, ^"scale", Vector2(1.2, 1.2), 0.15)
-	tw.chain().tween_property(exit_sprite, ^"scale", Vector2.ONE, 0.12)
+	_portal_tween = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_portal_tween.tween_property(exit_sprite, ^"scale", Vector2(1.2, 1.2), 0.15)
+	_portal_tween.chain().tween_property(exit_sprite, ^"scale", Vector2.ONE, 0.12)
 
 func trigger_screen_shake(intensity: float = 1.5, duration: float = 0.12) -> void:
 	if reduced_motion or not screen_shake_enabled or camera == null:
@@ -301,6 +304,9 @@ func animate_victory(on_complete: Callable = Callable()) -> void:
 		player_view.animate_victory(on_complete)
 
 func kill_all_tweens() -> void:
+	if _portal_tween and _portal_tween.is_valid():
+		_portal_tween.kill()
+		_portal_tween = null
 	if player_view:
 		player_view.cancel_tweens()
 	for bv: BlockView in block_views.values():

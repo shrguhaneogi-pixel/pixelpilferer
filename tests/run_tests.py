@@ -15,6 +15,7 @@ from test_domain_model import run_unit_tests
 from test_puzzle_solver import verify_all_levels
 from test_vertical_slice import run_vertical_slice_tests
 from test_solver_validation import run_solver_validation_tests
+from test_adversarial_qa import run_adversarial_suite
 
 def main() -> int:
     print("=======================================================")
@@ -52,8 +53,16 @@ def main() -> int:
         print("\n[ERROR] Level solvability verification failed!")
         return 1
 
+    print("\n")
+
+    # Step 5: Run Phase 8 Adversarial QA & Reliability Suite
+    p8_result = run_adversarial_suite()
+    if p8_result != 0:
+        print("\n[ERROR] Phase 8 Adversarial QA tests failed!")
+        return 1
+
     print("\n=======================================================")
-    print(" [ALL TESTS PASSED] Domain, rules, and all 23 levels OK ")
+    print(" [ALL TESTS PASSED] Domain, rules, solver, & QA audit OK")
     print("=======================================================")
     return 0
 

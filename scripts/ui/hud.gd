@@ -217,9 +217,11 @@ func hide_win() -> void:
 		win_modal.visible = false
 
 func _on_undo_button_pressed() -> void:
+	hide_win()
 	undo_pressed.emit()
 
 func _on_restart_button_pressed() -> void:
+	hide_win()
 	restart_pressed.emit()
 
 func _on_hint_button_pressed() -> void:

@@ -1,6 +1,6 @@
 # Pixel Pilferer — Campaign Solvability & Balance Audit Report
 
-**Generated:** 2026-11-15 08:05:19
+**Generated:** 2026-11-15 11:29:53
 **Solvability Engine:** Deterministic Breadth-First Search (BFS) with Authoritative `GameRules`
 **Validation Status:** 20 / 20 Levels Verified (100% Solvable & Replay Verified)
 
@@ -24,26 +24,26 @@ Every puzzle adheres to the non-negotiable game rules, enforces strict single-bl
 
 | Level ID | Chapter | Name | Status | Min Steps | Explored States | Interactions | Solve Time | Warnings |
 | :--- | :---: | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
-| `ch1_01` | Ch 1 | The Blocked Alley | **SOLVED** | 5 | 63 | 1 | 0.0025s | None |
-| `ch1_02` | Ch 1 | The Side Pocket | **SOLVED** | 7 | 27 | 3 | 0.0014s | None |
-| `ch1_03` | Ch 1 | Turnabout | **SOLVED** | 13 | 106 | 3 | 0.0069s | None |
-| `ch1_04` | Ch 1 | Squeeze Point | **SOLVED** | 8 | 106 | 3 | 0.0046s | None |
-| `ch1_05` | Ch 1 | The Double Gate | **SOLVED** | 8 | 44 | 3 | 0.0021s | None |
-| `ch2_01` | Ch 2 | First Gap | **SOLVED** | 6 | 15 | 2 | 0.0009s | None |
-| `ch2_02` | Ch 2 | Obstacle to Bridge | **SOLVED** | 7 | 15 | 2 | 0.0008s | None |
-| `ch2_03` | Ch 2 | Island Hop | **SOLVED** | 8 | 26 | 2 | 0.0022s | None |
-| `ch2_04` | Ch 2 | The Leapfrog | **SOLVED** | 10 | 19 | 4 | 0.0009s | None |
-| `ch2_05` | Ch 2 | The Grand Divide | **SOLVED** | 12 | 94 | 4 | 0.0043s | None |
-| `ch3_01` | Ch 3 | Conduit Awakening | **SOLVED** | 5 | 41 | 2 | 0.0013s | None |
-| `ch3_02` | Ch 3 | The Vault Niche | **SOLVED** | 10 | 56 | 2 | 0.0022s | None |
-| `ch3_03` | Ch 3 | Conduit and Chasm | **SOLVED** | 12 | 184 | 3 | 0.0073s | None |
-| `ch3_04` | Ch 3 | Dual Conduits | **SOLVED** | 14 | 727 | 4 | 0.0415s | None |
-| `ch3_05` | Ch 3 | Vault Masterwork | **SOLVED** | 14 | 1751 | 4 | 0.0788s | None |
-| `ch4_01` | Ch 4 | Prismatic Intro | **SOLVED** | 5 | 41 | 2 | 0.0029s | None |
-| `ch4_02` | Ch 4 | Duo Resonators | **SOLVED** | 15 | 795 | 4 | 0.0476s | None |
-| `ch4_03` | Ch 4 | Chromatic Bridge | **SOLVED** | 11 | 142 | 5 | 0.0049s | None |
+| `ch1_01` | Ch 1 | The Blocked Alley | **SOLVED** | 5 | 63 | 1 | 0.0015s | None |
+| `ch1_02` | Ch 1 | The Side Pocket | **SOLVED** | 7 | 27 | 3 | 0.0008s | None |
+| `ch1_03` | Ch 1 | Turnabout | **SOLVED** | 13 | 106 | 3 | 0.0035s | None |
+| `ch1_04` | Ch 1 | Squeeze Point | **SOLVED** | 8 | 106 | 3 | 0.0045s | None |
+| `ch1_05` | Ch 1 | The Double Gate | **SOLVED** | 8 | 44 | 3 | 0.0011s | None |
+| `ch2_01` | Ch 2 | First Gap | **SOLVED** | 6 | 15 | 2 | 0.0005s | None |
+| `ch2_02` | Ch 2 | Obstacle to Bridge | **SOLVED** | 7 | 15 | 2 | 0.0004s | None |
+| `ch2_03` | Ch 2 | Island Hop | **SOLVED** | 8 | 26 | 2 | 0.0009s | None |
+| `ch2_04` | Ch 2 | The Leapfrog | **SOLVED** | 10 | 19 | 4 | 0.0007s | None |
+| `ch2_05` | Ch 2 | The Grand Divide | **SOLVED** | 12 | 94 | 4 | 0.0032s | None |
+| `ch3_01` | Ch 3 | Conduit Awakening | **SOLVED** | 5 | 41 | 2 | 0.0011s | None |
+| `ch3_02` | Ch 3 | The Vault Niche | **SOLVED** | 10 | 56 | 2 | 0.0033s | None |
+| `ch3_03` | Ch 3 | Conduit and Chasm | **SOLVED** | 12 | 184 | 3 | 0.0067s | None |
+| `ch3_04` | Ch 3 | Dual Conduits | **SOLVED** | 14 | 727 | 4 | 0.0283s | None |
+| `ch3_05` | Ch 3 | Vault Masterwork | **SOLVED** | 14 | 1751 | 4 | 0.092s | None |
+| `ch4_01` | Ch 4 | Prismatic Intro | **SOLVED** | 5 | 41 | 2 | 0.003s | None |
+| `ch4_02` | Ch 4 | Duo Resonators | **SOLVED** | 15 | 795 | 4 | 0.057s | None |
+| `ch4_03` | Ch 4 | Chromatic Bridge | **SOLVED** | 11 | 142 | 5 | 0.0059s | None |
 | `ch4_04` | Ch 4 | Triad Conduits | **SOLVED** | 30 | 92 | 6 | 0.005s | None |
-| `ch4_05` | Ch 4 | The Grand Core | **SOLVED** | 24 | 73 | 8 | 0.004s | None |
+| `ch4_05` | Ch 4 | The Grand Core | **SOLVED** | 24 | 73 | 8 | 0.003s | None |
 
 ---
 
