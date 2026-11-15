@@ -14,6 +14,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from test_domain_model import run_unit_tests
 from test_puzzle_solver import verify_all_levels
 from test_vertical_slice import run_vertical_slice_tests
+from test_solver_validation import run_solver_validation_tests
 
 def main() -> int:
     print("=======================================================")
@@ -36,7 +37,15 @@ def main() -> int:
 
     print("\n")
 
-    # Step 3: Run all 23 level solvability proofs
+    # Step 3: Run Phase 4 solver, validation, and hint tests
+    p4_result = run_solver_validation_tests()
+    if p4_result != 0:
+        print("\n[ERROR] Phase 4 solver & validation tests failed!")
+        return 1
+
+    print("\n")
+
+    # Step 4: Run all 23 level solvability proofs
     levels_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "levels")
     solver_result = verify_all_levels(levels_dir)
     if not solver_result:

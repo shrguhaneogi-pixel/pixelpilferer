@@ -53,5 +53,5 @@
 - **Host OS:** Windows 11 (AMD64)
 - **Godot Binary:** Godot 4.7.2 stable official (`Godot_v4.7.2-stable_win64_console.exe`) installed via WinGet.
 - **Python:** Python 3.14.3 utilized for automated dual test harness, level validation, and asset checks.
-- **Godot Native Test Harness:** `tests/test_runner.gd` executes **198 assertions** (resource loading, data structures, invariants, all 28 deterministic tests, demo corridor scenario, 500-step randomized property fuzzing, board rendering, player animation & particles, block views, input handling & buffering, HUD upgrades, and sequential demo progression) with 100% success (exit code 0).
-- **Master Test Runner:** `python tests/run_tests.py` executes 79 deterministic test assertions, the vertical slice demo verification suite, and all 23 level A* solvability proofs with 100% success (exit code 0).
+- **Godot Native Test Harness:** `tests/test_runner.gd` executes **252 assertions** (resource loading, data structures, invariants, all 28 deterministic tests, demo corridor scenario, 500-step randomized property fuzzing, board rendering, player animation & particles, block views, input handling & buffering, HUD upgrades, sequential demo progression, and 14 Phase 4 solver/validator/hint verification tests) with 100% success (exit code 0).
+- **Master Test Runner:** `python tests/run_tests.py` executes 79 deterministic test assertions, the vertical slice demo verification suite, 54 Phase 4 solver & validator assertions, and all 23 level A* solvability proofs with 100% success (exit code 0).

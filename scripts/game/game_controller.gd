@@ -1,4 +1,6 @@
-class_name GameController extends Node2D
+class_name GameController extends Node
+
+const HintService = preload("res://scripts/services/hint_service.gd")
 
 ## Orchestrates user input, BoardModel updates, BoardRenderer visuals, and AudioService feedback.
 
@@ -247,10 +249,10 @@ func handle_restart() -> void:
 func handle_hint() -> void:
 	if current_level_dict.is_empty():
 		return
-	var hint_text: String = current_level_dict.get("hint", "Power all sockets and exit.")
+	var hint_text: String = ""
 	if model != null:
-		var sol: Dictionary = PuzzleSolver.solve(model.get_state(), 10000)
-		if sol["solved"] and sol["actions"].size() > 0:
-			var next_act: int = sol["actions"][0]
-			hint_text += " (Suggested next move: %s)" % Constants.action_name(next_act)
+		var hint_info: Dictionary = HintService.generate_hint(model.get_state())
+		hint_text = hint_info.get("hint_text", "")
+	if hint_text.is_empty():
+		hint_text = current_level_dict.get("hint", "Power all sockets and exit.")
 	hint_triggered.emit(hint_text)

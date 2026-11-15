@@ -1,5 +1,8 @@
 extends SceneTree
 
+const LevelValidator = preload("res://scripts/core/level_validator.gd")
+const HintService = preload("res://scripts/services/hint_service.gd")
+
 var _total_tests: int = 0
 var _failed_tests: int = 0
 
@@ -16,6 +19,7 @@ func _init() -> void:
 	_test_puzzle_solvability()
 	_test_phase3_rendering_and_views()
 	_test_phase3_input_and_hud()
+	_test_phase4_solver_and_validation()
 	
 	print("\n-------------------------------------------")
 	print("Total tests executed: %d | Failed: %d" % [_total_tests, _failed_tests])
@@ -786,3 +790,322 @@ func _test_phase3_input_and_hud() -> void:
 	_assert_eq(main._current_chapter, 1, "After demo_03, advances to Chapter 1")
 	_assert_eq(main._current_level_idx, 0, "Chapter 1 starts at Level 0 (ch1_01)")
 	main.queue_free()
+
+func _test_phase4_solver_and_validation() -> void:
+	print("\n=== 8. Verifying Phase 4 Puzzle Solver, Formal Level Validator, and Hint System ===")
+	
+	# ---------------------------------------------------------
+	# TEST 1: Simple route with no movable fragments
+	# ---------------------------------------------------------
+	var lvl1: Dictionary = {
+		"id": "t1_simple",
+		"name": "Simple Route",
+		"width": 5, "height": 3,
+		"layout": [
+			"#####",
+			"#P.E#",
+			"#####"
+		]
+	}
+	var v_res1: Dictionary = LevelValidator.validate_level(lvl1)
+	_assert_true(v_res1["valid"], "1. Level 1 layout is valid")
+	var s1: BoardState = LevelData.from_dict(lvl1)
+	var sol1: Dictionary = PuzzleSolver.solve(s1)
+	_assert_eq(sol1["status"], PuzzleSolver.SolverStatus.SOLVED, "1. Solved simple route")
+	_assert_eq(sol1["steps"], 2, "1. Exactly 2 steps (MOVE_EAST -> MOVE_EAST)")
+	_assert_eq(sol1["actions"], [Constants.ActionType.MOVE_EAST, Constants.ActionType.MOVE_EAST], "1. Optimal action sequence")
+	var vr1: Dictionary = PuzzleSolver.verify_solution(s1, sol1["actions"])
+	_assert_true(vr1["valid"], "1. Solution replay verification passed")
+
+	# ---------------------------------------------------------
+	# TEST 2: Puzzle requiring pickup (obstacle clearance)
+	# ---------------------------------------------------------
+	var lvl2: Dictionary = {
+		"id": "t2_pickup",
+		"name": "Pickup Obstacle",
+		"width": 6, "height": 3,
+		"layout": [
+			"######",
+			"#P..E#",
+			"######"
+		],
+		"blocks": [
+			{"pos": [2, 1], "color": Constants.BlockColor.CYAN}
+		]
+	}
+	var s2: BoardState = LevelData.from_dict(lvl2)
+	var sol2: Dictionary = PuzzleSolver.solve(s2)
+	_assert_eq(sol2["status"], PuzzleSolver.SolverStatus.SOLVED, "2. Solved puzzle requiring pickup")
+	_assert_eq(sol2["actions"][0], Constants.ActionType.INTERACT_EAST, "2. First action is INTERACT_EAST to siphon obstacle")
+	var vr2: Dictionary = PuzzleSolver.verify_solution(s2, sol2["actions"])
+	_assert_true(vr2["valid"], "2. Replay verification passed for pickup puzzle")
+
+	# ---------------------------------------------------------
+	# TEST 3: Puzzle requiring bridge placement
+	# ---------------------------------------------------------
+	var s3 := BoardState.new()
+	s3.grid_size = Vector2i(6, 3)
+	for x: int in 6:
+		for y: int in 3:
+			s3.tiles[Vector2i(x, y)] = Constants.TileType.WALL
+	s3.tiles[Vector2i(1, 1)] = Constants.TileType.FLOOR
+	s3.tiles[Vector2i(2, 1)] = Constants.TileType.VOID
+	s3.tiles[Vector2i(3, 1)] = Constants.TileType.FLOOR
+	s3.tiles[Vector2i(4, 1)] = Constants.TileType.FLOOR
+	s3.player_pos = Vector2i(1, 1)
+	s3.exit_cell = Vector2i(4, 1)
+	s3.carried_block = {"id": 1, "color": Constants.BlockColor.CYAN}
+	var sol3: Dictionary = PuzzleSolver.solve(s3)
+	_assert_eq(sol3["status"], PuzzleSolver.SolverStatus.SOLVED, "3. Solved puzzle requiring bridge placement")
+	_assert_eq(sol3["actions"][0], Constants.ActionType.INTERACT_EAST, "3. First action places bridge eastward into void")
+	var vr3: Dictionary = PuzzleSolver.verify_solution(s3, sol3["actions"])
+	_assert_true(vr3["valid"], "3. Bridge placement replay verification passed")
+
+	# ---------------------------------------------------------
+	# TEST 4: Puzzle requiring neutral socket
+	# ---------------------------------------------------------
+	var lvl4: Dictionary = {
+		"id": "t4_neutral_socket",
+		"name": "Neutral Socket",
+		"width": 6, "height": 4,
+		"layout": [
+			"######",
+			"#P..E#",
+			"#. S.#",
+			"######"
+		],
+		"blocks": [
+			{"pos": [2, 1], "color": Constants.BlockColor.MAGENTA}
+		]
+	}
+	var s4: BoardState = LevelData.from_dict(lvl4)
+	var sol4: Dictionary = PuzzleSolver.solve(s4)
+	_assert_eq(sol4["status"], PuzzleSolver.SolverStatus.SOLVED, "4. Solved neutral socket puzzle")
+	var vr4: Dictionary = PuzzleSolver.verify_solution(s4, sol4["actions"])
+	_assert_true(vr4["valid"], "4. Neutral socket replay verification passed")
+	_assert_true(vr4["final_state"].is_socket_satisfied(Vector2i(3, 2)), "4. Socket is satisfied in final state")
+
+	# ---------------------------------------------------------
+	# TEST 5: Puzzle requiring colored socket
+	# ---------------------------------------------------------
+	var s5 := BoardState.new()
+	s5.grid_size = Vector2i(5, 5)
+	for x: int in 5:
+		for y: int in 5:
+			s5.tiles[Vector2i(x, y)] = Constants.TileType.WALL
+	s5.tiles[Vector2i(2, 2)] = Constants.TileType.FLOOR
+	s5.tiles[Vector2i(3, 2)] = Constants.TileType.FLOOR
+	s5.tiles[Vector2i(2, 1)] = Constants.TileType.FLOOR
+	s5.tiles[Vector2i(1, 2)] = Constants.TileType.FLOOR
+	s5.tiles[Vector2i(2, 3)] = Constants.TileType.FLOOR
+	s5.player_pos = Vector2i(2, 2)
+	s5.exit_cell = Vector2i(1, 2)
+	s5.sockets[Vector2i(3, 2)] = Constants.BlockColor.CYAN
+	s5.sockets[Vector2i(2, 1)] = Constants.BlockColor.AMBER
+	s5.blocks[Vector2i(2, 3)] = {"id": 1, "color": Constants.BlockColor.CYAN, "is_bridge": false}
+	s5.carried_block = {"id": 2, "color": Constants.BlockColor.AMBER}
+	var sol5: Dictionary = PuzzleSolver.solve(s5)
+	_assert_eq(sol5["status"], PuzzleSolver.SolverStatus.SOLVED, "5. Solved colored socket puzzle")
+	var vr5: Dictionary = PuzzleSolver.verify_solution(s5, sol5["actions"])
+	_assert_true(vr5["valid"], "5. Colored sockets replay verification passed")
+	_assert_true(vr5["final_state"].is_all_sockets_satisfied(), "5. All colored sockets satisfied")
+
+	# ---------------------------------------------------------
+	# TEST 6: Two indistinguishable fragments producing identical canonical key
+	# ---------------------------------------------------------
+	var s6_a := BoardState.new()
+	s6_a.player_pos = Vector2i(2, 2)
+	s6_a.blocks[Vector2i(1, 1)] = {"id": 10, "color": Constants.BlockColor.CYAN, "is_bridge": false}
+	s6_a.blocks[Vector2i(3, 3)] = {"id": 20, "color": Constants.BlockColor.CYAN, "is_bridge": false}
+
+	var s6_b := BoardState.new()
+	s6_b.player_pos = Vector2i(2, 2)
+	s6_b.blocks[Vector2i(1, 1)] = {"id": 20, "color": Constants.BlockColor.CYAN, "is_bridge": false}
+	s6_b.blocks[Vector2i(3, 3)] = {"id": 10, "color": Constants.BlockColor.CYAN, "is_bridge": false}
+
+	_assert_eq(s6_a.get_canonical_key(), s6_b.get_canonical_key(), "6. Identical block colors with swapped IDs produce identical canonical key")
+
+	var s6_c := BoardState.new()
+	s6_c.player_pos = Vector2i(2, 2)
+	s6_c.carried_block = {"id": 1, "color": Constants.BlockColor.CYAN}
+
+	var s6_d := BoardState.new()
+	s6_d.player_pos = Vector2i(2, 2)
+	s6_d.carried_block = {"id": 99, "color": Constants.BlockColor.CYAN}
+
+	_assert_eq(s6_c.get_canonical_key(), s6_d.get_canonical_key(), "6. Carried blocks with identical color but different IDs produce identical canonical key")
+
+	# ---------------------------------------------------------
+	# TEST 7: Deliberately impossible level (reports UNSOLVABLE)
+	# ---------------------------------------------------------
+	var lvl7: Dictionary = {
+		"id": "t7_impossible",
+		"name": "Sealed Vault",
+		"width": 7, "height": 3,
+		"layout": [
+			"#######",
+			"#P#.#E#",
+			"#######"
+		]
+	}
+	var s7: BoardState = LevelData.from_dict(lvl7)
+	var sol7: Dictionary = PuzzleSolver.solve(s7)
+	_assert_eq(sol7["status"], PuzzleSolver.SolverStatus.UNSOLVABLE, "7. Impossible level reports UNSOLVABLE")
+	_assert_eq(sol7["solved"], false, "7. Solved is false")
+	_assert_eq(sol7["steps"], -1, "7. Steps is -1")
+
+	# ---------------------------------------------------------
+	# TEST 8: Invalid level (reports validation failure with specific field/coords)
+	# ---------------------------------------------------------
+	var lvl8_wall_block: Dictionary = {
+		"id": "t8_invalid",
+		"name": "Wall Block Error",
+		"width": 5, "height": 3,
+		"layout": [
+			"#####",
+			"#P.E#",
+			"#####"
+		],
+		"blocks": [
+			{"pos": [2, 0], "color": Constants.BlockColor.CYAN}
+		]
+	}
+	var v_res8: Dictionary = LevelValidator.validate_level(lvl8_wall_block)
+	_assert_eq(v_res8["valid"], false, "8. Block on wall rejected")
+	_assert_eq(v_res8["cell"], Vector2i(2, 0), "8. Error names offending cell (2, 0)")
+	_assert_true("immutable wall" in v_res8["error"], "8. Error message specifies immutable wall rule")
+
+	var lvl8_ragged: Dictionary = {
+		"id": "t8_ragged",
+		"name": "Ragged",
+		"width": 5, "height": 3,
+		"layout": [
+			"#####",
+			"#P.E",
+			"#####"
+		]
+	}
+	var v_res_ragged: Dictionary = LevelValidator.validate_level(lvl8_ragged)
+	_assert_eq(v_res_ragged["valid"], false, "8. Ragged layout rejected")
+	_assert_true("ragged layout" in v_res_ragged["error"], "8. Error specifies ragged layout")
+
+	var lvl8_overlap: Dictionary = {
+		"id": "t8_overlap",
+		"name": "Overlap",
+		"width": 5, "height": 3,
+		"layout": [
+			"#####",
+			"#P.E#",
+			"#####"
+		],
+		"blocks": [
+			{"pos": [2, 1], "color": Constants.BlockColor.CYAN},
+			{"pos": [2, 1], "color": Constants.BlockColor.AMBER}
+		]
+	}
+	var v_res_overlap: Dictionary = LevelValidator.validate_level(lvl8_overlap)
+	_assert_eq(v_res_overlap["valid"], false, "8. Overlapping blocks rejected")
+	_assert_eq(v_res_overlap["cell"], Vector2i(2, 1), "8. Overlap coordinates identified")
+
+	# ---------------------------------------------------------
+	# TEST 9: Multi-step puzzle requiring multiple steals and placements
+	# ---------------------------------------------------------
+	var lvl9: Dictionary = {
+		"id": "t9_multistep",
+		"name": "Demo 02 Bridge Crossing",
+		"width": 8, "height": 5,
+		"layout": [
+			"########",
+			"#P... E#",
+			"#..#### #",
+			"#..#    #",
+			"########"
+		],
+		"blocks": [
+			{"pos": [2, 1], "color": Constants.BlockColor.CYAN}
+		]
+	}
+	var s9: BoardState = LevelData.from_dict(lvl9)
+	var sol9: Dictionary = PuzzleSolver.solve(s9)
+	_assert_eq(sol9["status"], PuzzleSolver.SolverStatus.SOLVED, "9. Multi-step puzzle solved")
+	_assert_true(sol9["steps"] >= 5, "9. Requires multiple steps (actual: %d)" % sol9["steps"])
+	var vr9: Dictionary = PuzzleSolver.verify_solution(s9, sol9["actions"])
+	_assert_true(vr9["valid"], "9. Multi-step solution replay verification succeeded")
+
+	# ---------------------------------------------------------
+	# TEST 10: Equivalent states with reordered fragments produce same canonical hash
+	# ---------------------------------------------------------
+	var s10_1 := BoardState.new()
+	s10_1.player_pos = Vector2i(2, 2)
+	s10_1.blocks[Vector2i(1, 2)] = {"id": 1, "color": Constants.BlockColor.CYAN, "is_bridge": false}
+	s10_1.blocks[Vector2i(3, 2)] = {"id": 2, "color": Constants.BlockColor.AMBER, "is_bridge": false}
+	s10_1.blocks[Vector2i(2, 3)] = {"id": 3, "color": Constants.BlockColor.EMERALD, "is_bridge": true}
+
+	var s10_2 := BoardState.new()
+	s10_2.player_pos = Vector2i(2, 2)
+	s10_2.blocks[Vector2i(2, 3)] = {"id": 3, "color": Constants.BlockColor.EMERALD, "is_bridge": true}
+	s10_2.blocks[Vector2i(1, 2)] = {"id": 1, "color": Constants.BlockColor.CYAN, "is_bridge": false}
+	s10_2.blocks[Vector2i(3, 2)] = {"id": 2, "color": Constants.BlockColor.AMBER, "is_bridge": false}
+
+	_assert_eq(s10_1.get_canonical_key(), s10_2.get_canonical_key(), "10. Insertion order differences produce identical canonical keys")
+	_assert_eq(s10_1.get_state_hash(), s10_2.get_state_hash(), "10. Hashes match identically")
+
+	# ---------------------------------------------------------
+	# TEST 11: Current-state hint after several moves
+	# ---------------------------------------------------------
+	var s11: BoardState = LevelData.from_dict(lvl9)
+	var res_step1: Dictionary = GameRules.apply_action(s11, Constants.ActionType.INTERACT_EAST)
+	_assert_true(res_step1["success"], "11. Move 1 succeeded")
+	var state_after_step1: BoardState = res_step1["next_state"]
+
+	var hint1: Dictionary = HintService.generate_hint(state_after_step1)
+	_assert_true(hint1["has_hint"], "11. Hint generated from intermediate state")
+	_assert_eq(hint1["status"], "SOLVED", "11. Hint status is SOLVED")
+	_assert_eq(hint1["next_action"], Constants.ActionType.MOVE_EAST, "11. Hint suggests moving East next")
+	_assert_true("East" in hint1["hint_text"], "11. Hint mentions East direction")
+
+	var s11_unwinnable: BoardState = LevelData.from_dict(lvl7)
+	var hint_fail: Dictionary = HintService.generate_hint(s11_unwinnable)
+	_assert_eq(hint_fail["has_hint"], false, "11. Unwinnable state has has_hint=false")
+	_assert_eq(hint_fail["status"], "UNSOLVABLE", "11. Unwinnable state has status=UNSOLVABLE")
+	_assert_true("Undo" in hint_fail["hint_text"], "11. Hint recommends Undo or Restart")
+
+	# ---------------------------------------------------------
+	# TEST 12: Search limit behavior (reports LIMIT_REACHED with max_visited=5)
+	# ---------------------------------------------------------
+	var s12: BoardState = LevelData.from_dict(lvl9)
+	var sol12: Dictionary = PuzzleSolver.solve(s12, 5)
+	_assert_eq(sol12["status"], PuzzleSolver.SolverStatus.LIMIT_REACHED, "12. Search limit reached reports LIMIT_REACHED")
+	_assert_eq(sol12["solved"], false, "12. Solved is false")
+	_assert_true(sol12["visited_count"] > 5, "12. Visited count reflects threshold")
+	_assert_true("budget" in sol12["message"].to_lower(), "12. Message specifies budget exceeded")
+
+	# ---------------------------------------------------------
+	# TEST 13: Solution replay verification passes & catches illegal modifications
+	# ---------------------------------------------------------
+	var s13: BoardState = LevelData.from_dict(lvl1)
+	var sol13: Dictionary = PuzzleSolver.solve(s13)
+	var vr13_good: Dictionary = PuzzleSolver.verify_solution(s13, sol13["actions"])
+	_assert_true(vr13_good["valid"], "13. Replay verification passes on genuine solution")
+
+	var tampered_actions: Array = [Constants.ActionType.MOVE_NORTH] + sol13["actions"]
+	var vr13_bad: Dictionary = PuzzleSolver.verify_solution(s13, tampered_actions)
+	_assert_eq(vr13_bad["valid"], false, "13. Replay verification catches illegal move")
+	_assert_eq(vr13_bad["failed_step"], 0, "13. Identified step 0 as failure")
+	_assert_eq(vr13_bad["rejection_reason"], &"blocked_wall", "13. Rejection reason is blocked_wall")
+
+	# ---------------------------------------------------------
+	# TEST 14: Solver solution followed by live model completion
+	# ---------------------------------------------------------
+	var s14: BoardState = LevelData.from_dict(lvl1)
+	var model14 := BoardModel.new()
+	model14.initialize(s14)
+	var sol14: Dictionary = PuzzleSolver.solve(s14)
+
+	for act: int in sol14["actions"]:
+		var step_res: Dictionary = model14.try_action(act)
+		_assert_true(step_res["success"], "14. Model action executed cleanly")
+
+	_assert_true(model14.is_completed(), "14. Live model reached completed status")
+	_assert_eq(model14.get_state().player_pos, Vector2i(3, 1), "14. Final player position matches exit")
+

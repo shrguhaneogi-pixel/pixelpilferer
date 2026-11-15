@@ -1,5 +1,7 @@
 class_name LevelRepository extends RefCounted
 
+const LevelValidator = preload("res://scripts/core/level_validator.gd")
+
 ## Loads and validates level definitions from data/levels JSON resources.
 
 static func get_chapter_path(chapter_num: int) -> String:
@@ -50,36 +52,4 @@ static func load_demo_level(index: int) -> Dictionary:
 	return load_level(0, index)
 
 static func validate_level_dict(d: Dictionary) -> Dictionary:
-	if not d.has("id") or str(d["id"]).is_empty():
-		return { "valid": false, "error": "Missing or empty 'id' field." }
-		
-	if not d.has("name") or str(d["name"]).is_empty():
-		return { "valid": false, "error": "Missing or empty 'name' field." }
-		
-	var w: int = d.get("width", 0)
-	var h: int = d.get("height", 0)
-	if w <= 0 or h <= 0:
-		return { "valid": false, "error": "Dimensions width and height must be positive integers." }
-		
-	var layout: Array = d.get("layout", [])
-	if layout.size() != h:
-		return { "valid": false, "error": "Layout row count (%d) does not match height (%d)." % [layout.size(), h] }
-		
-	var has_player: bool = d.has("player_start")
-	var has_exit: bool = d.has("exit_pos")
-	
-	for y: int in layout.size():
-		var row: String = layout[y]
-		if row.length() != w:
-			return { "valid": false, "error": "Row %d length (%d) does not match width (%d)." % [y, row.length(), w] }
-		if "P" in row:
-			has_player = true
-		if "E" in row:
-			has_exit = true
-			
-	if not has_player:
-		return { "valid": false, "error": "Level must specify player start position ('P' in layout or 'player_start')." }
-	if not has_exit:
-		return { "valid": false, "error": "Level must specify exit portal position ('E' in layout or 'exit_pos')." }
-		
-	return { "valid": true, "error": "" }
+	return LevelValidator.validate_level(d)

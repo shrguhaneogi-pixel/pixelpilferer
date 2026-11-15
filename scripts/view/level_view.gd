@@ -1,5 +1,7 @@
 class_name LevelView extends Node2D
 
+const HintService = preload("res://scripts/services/hint_service.gd")
+
 signal level_completed
 signal turn_changed(turn: int)
 signal hint_requested(hint_text: String)
@@ -235,10 +237,10 @@ func _handle_restart() -> void:
 	turn_changed.emit(current_state.turn_count)
 
 func _handle_hint() -> void:
-	var hint_text: String = level_dict.get("hint", "Power every socket and reach the exit.")
-	# Optional: Query PuzzleSolver for immediate optimal next action!
-	var sol: Dictionary = PuzzleSolver.solve(current_state, 10000)
-	if sol["solved"] and sol["actions"].size() > 0:
-		var next_act: int = sol["actions"][0]
-		hint_text += " (Suggested next move: %s)" % Constants.action_name(next_act)
+	var hint_text: String = ""
+	if current_state != null:
+		var hint_info: Dictionary = HintService.generate_hint(current_state)
+		hint_text = hint_info.get("hint_text", "")
+	if hint_text.is_empty():
+		hint_text = level_dict.get("hint", "Power every socket and reach the exit.")
 	hint_requested.emit(hint_text)

@@ -110,16 +110,36 @@ A 500-step random walk test with 10% undo probability asserting 5 physical invar
 
 ---
 
-## 6. Test Runners & Commands
+## 6. Phase 4 Puzzle Solver & Level Validation Verification
+
+14 comprehensive test cases verifying solver optimality, formal schema validation, solution replay, and intelligent hint generation:
+1. **Simple Route:** 2-step straight path with no movable blocks solved and verified.
+2. **Pickup Obstacle:** Requires siphoning blocking block eastward to reach exit portal.
+3. **Bridge Placement:** Requires placing carried block into void to bridge chasm and cross.
+4. **Neutral Socket:** Placement of block onto neutral socket unlocks exit portal.
+5. **Colored Socket:** Specific placement of Cyan block onto Cyan socket (and Amber onto Amber) satisfies win condition.
+6. **Indistinguishable Fragments:** Swapped block IDs of identical color and carried fragments produce identical canonical keys.
+7. **Impossible Level:** Enclosed room with no solution correctly returns `SolverStatus.UNSOLVABLE` (`solved == false`, `steps == -1`).
+8. **Level Validator Rejections:** Catches blocks on immutable walls (with cell coordinate), ragged layouts, and overlapping blocks.
+9. **Multi-Step Puzzle:** Multi-action steal-bridge-cross sequences verified solvable in minimal step count.
+10. **Fragment Reordering:** Different block insertion orders produce 100% identical canonical keys and state hashes.
+11. **Contextual Hint System:** Hint queries from mid-level states provide valid next-action guidance; unwinnable states advise Undo or Restart.
+12. **Search Limit Enforcement:** Limiting search budget (e.g. `max_visited = 5`) safely returns `SolverStatus.LIMIT_REACHED` without falsely claiming unsolvable.
+13. **Solution Replay Verification:** Verifies all steps execute cleanly to completion, and detects tampered illegal actions with exact step index and rejection reason.
+14. **Live Model Execution:** Actions returned by solver executed sequentially through `BoardModel`, firing signals and completing level.
+
+---
+
+## 7. Test Runners & Commands
 
 ### Headless Godot 4.7.2 Suite
 ```powershell
 & "C:\Users\Dell\AppData\Local\Microsoft\WinGet\Packages\GodotEngine.GodotEngine_Microsoft.Winget.Source_8wekyb3d8bbwe\Godot_v4.7.2-stable_win64_console.exe" --headless --script res://tests/test_runner.gd
 ```
-- Runs **198 assertions** covering resource loading, data structures, invariants, all 28 deterministic tests, demo corridor scenario, 500-step fuzzing, board rendering, player animation & particles, block views, input handling & buffering, HUD upgrades, and sequential demo progression.
+- Runs **252 assertions** covering resource loading, data structures, invariants, all 28 deterministic tests, demo corridor scenario, 500-step fuzzing, board rendering, player animation & particles, block views, input handling & buffering, HUD upgrades, sequential demo progression, and the 14 Phase 4 solver & validation tests.
 
 ### Master Headless Runner (Python dual-harness)
 ```powershell
 python tests/run_tests.py
 ```
-- Runs 79 domain assertions, vertical slice demo verification, and all 23 levels verified solvable with A* search heuristic.
+- Runs 79 domain assertions, vertical slice demo verification, 54 Phase 4 solver/validator assertions, and all 23 levels verified solvable with A* search heuristic.

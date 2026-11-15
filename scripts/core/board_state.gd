@@ -134,10 +134,10 @@ func is_carrying() -> bool:
 ## regardless of internal insertion order. Excludes turn_count and undo history.
 func get_canonical_key() -> String:
 	var parts: Array[String] = []
-	parts.append("P(%d,%d,%d,%d)" % [player_pos.x, player_pos.y, player_facing.x, player_facing.y])
+	parts.append("P(%d,%d)" % [player_pos.x, player_pos.y])
 	
 	if is_carrying():
-		parts.append("C(%d,%d)" % [carried_block["id"], carried_block["color"]])
+		parts.append("C(%d)" % carried_block["color"])
 	else:
 		parts.append("C(-)")
 		

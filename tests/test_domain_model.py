@@ -124,10 +124,10 @@ class BoardState:
         return self.carried_block is not None
 
     def get_canonical_key(self) -> str:
-        carried_str = f"C({self.carried_block['id']},{self.carried_block['color']})" if self.carried_block else "C(-)"
+        carried_str = f"C({self.carried_block['color']})" if self.carried_block else "C(-)"
         sorted_blocks = sorted(self.blocks.items(), key=lambda item: (item[0][0], item[0][1]))
         b_str = ",".join(f"({k[0]},{k[1]}:{v['color']},{1 if v['is_bridge'] else 0})" for k, v in sorted_blocks)
-        return f"P({self.player_pos[0]},{self.player_pos[1]},{self.player_facing[0]},{self.player_facing[1]})|{carried_str}|B[{b_str}]"
+        return f"P({self.player_pos[0]},{self.player_pos[1]})|{carried_str}|B[{b_str}]"
 
     def get_state_hash(self) -> str:
         return self.get_canonical_key()

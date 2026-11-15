@@ -26,7 +26,8 @@ func _setup_subsystems() -> void:
 	game_controller.hint_triggered.connect(_on_hint_triggered)
 	game_controller.menu_requested.connect(_show_chapter_select)
 	add_child(game_controller)
-	game_controller.visible = false
+	if game_controller.renderer:
+		game_controller.renderer.visible = false
 	
 	# 2. CanvasLayer UI containers
 	var canvas := CanvasLayer.new()
@@ -91,7 +92,7 @@ func _show_title_screen() -> void:
 	if chapter_select: chapter_select.visible = false
 	if settings_menu: settings_menu.visible = false
 	if hud_node: hud_node.visible = false
-	if game_controller: game_controller.visible = false
+	if game_controller and game_controller.renderer: game_controller.renderer.visible = false
 
 func _show_chapter_select() -> void:
 	if title_screen: title_screen.visible = false
@@ -100,7 +101,7 @@ func _show_chapter_select() -> void:
 		chapter_select._populate_levels()
 	if settings_menu: settings_menu.visible = false
 	if hud_node: hud_node.visible = false
-	if game_controller: game_controller.visible = false
+	if game_controller and game_controller.renderer: game_controller.renderer.visible = false
 
 func _show_settings() -> void:
 	if settings_menu:
@@ -128,7 +129,7 @@ func _load_specific_level(chapter_num: int, level_idx: int) -> void:
 	if settings_menu: settings_menu.visible = false
 	
 	if game_controller:
-		game_controller.visible = true
+		if game_controller.renderer: game_controller.renderer.visible = true
 		game_controller.load_level_data(lvl)
 	
 	if hud_node:
