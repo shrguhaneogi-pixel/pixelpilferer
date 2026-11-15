@@ -32,6 +32,7 @@ var is_jumping: bool = false
 var input_enabled: bool = true
 var was_on_floor: bool = false
 var spawn_position: Vector2 = Vector2.ZERO
+var respawn_position: Vector2 = Vector2.ZERO
 
 ## Carried Block State (Strict capacity: 1)
 var carried_block: Variant = null # null or { "color": int, "symbol": String }
@@ -56,6 +57,7 @@ var simulated_interact_just_pressed: bool = false
 
 func _ready() -> void:
 	spawn_position = global_position
+	respawn_position = global_position
 	# Safe collision layer setup: Player is on Layer 1, collides with Layer 2 (Terrain)
 	collision_layer = 1
 	collision_mask = 2
@@ -168,8 +170,11 @@ func execute_jump() -> void:
 
 func die() -> void:
 	velocity = Vector2.ZERO
-	global_position = spawn_position
+	global_position = respawn_position
 	died.emit()
+
+func set_respawn_position(pos: Vector2) -> void:
+	respawn_position = pos
 
 func get_target_cell() -> Vector2i:
 	var target_world_pos: Vector2 = global_position + Vector2(aim_offset.x * 16.0, aim_offset.y * 16.0)

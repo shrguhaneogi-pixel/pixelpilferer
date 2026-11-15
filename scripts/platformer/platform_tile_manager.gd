@@ -29,17 +29,34 @@ var blocks: Dictionary = {}
 var initial_snapshot: Array = []
 
 func _ready() -> void:
+	for child in get_children():
+		if child is StaticBody2D and (child.name.begins_with("Block") or child.has_meta("block_data")):
+			var cell_x: int = int(round((child.position.x - 8.0) / 16.0))
+			var cell_y: int = int(round((child.position.y - 8.0) / 16.0))
+			var cell: Vector2i = Vector2i(cell_x, cell_y)
+			var color: int = 0
+			if child.has_meta("color"):
+				color = child.get_meta("color")
+			elif child.has_meta("block_data"):
+				color = child.get_meta("block_data").get("color", 0)
+			register_existing_block(cell, child, color)
 	capture_initial_snapshot()
 
 func capture_initial_snapshot() -> void:
-	initial_snapshot.clear()
+	initial_snapshot = capture_snapshot()
+
+func capture_snapshot() -> Array:
+	var snap: Array = []
 	for cell in blocks.keys():
-		var block_data = blocks[cell].get_meta("block_data", { "color": 0, "symbol": "◆" })
-		initial_snapshot.append({
-			"cell": cell,
-			"color": block_data["color"],
-			"symbol": block_data["symbol"]
-		})
+		var body = blocks[cell]
+		if is_instance_valid(body):
+			var block_data = body.get_meta("block_data", { "color": 0, "symbol": "◆" })
+			snap.append({
+				"cell": cell,
+				"color": block_data["color"],
+				"symbol": block_data["symbol"]
+			})
+	return snap
 
 func has_block(cell: Vector2i) -> bool:
 	return blocks.has(cell)
@@ -119,13 +136,19 @@ func register_existing_block(cell: Vector2i, body: StaticBody2D, color: int = 0)
 	blocks[cell] = body
 
 func reset_to_snapshot() -> void:
+	restore_snapshot(initial_snapshot)
+
+func restore_snapshot(snap: Array) -> void:
 	# Clear all current dynamic blocks
 	for cell in blocks.keys():
 		var body = blocks[cell]
 		if is_instance_valid(body):
+			var shape: CollisionShape2D = body.get_node_or_null("CollisionShape2D")
+			if shape:
+				shape.disabled = true
 			body.queue_free()
 	blocks.clear()
 
-	# Re-create blocks from initial snapshot
-	for entry in initial_snapshot:
+	# Re-create blocks from given snapshot
+	for entry in snap:
 		create_block(entry["cell"], entry["color"], entry["symbol"])

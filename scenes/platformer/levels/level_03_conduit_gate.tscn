@@ -1,0 +1,149 @@
+[gd_scene load_steps=17 format=3]
+
+[ext_resource type="Script" path="res://scripts/platformer/platformer_level.gd" id="1_level"]
+[ext_resource type="Script" path="res://scripts/platformer/platform_tile_manager.gd" id="2_tile_mgr"]
+[ext_resource type="Script" path="res://scripts/platformer/player_platformer.gd" id="3_player"]
+[ext_resource type="Script" path="res://scripts/platformer/pixel_glove.gd" id="4_glove"]
+[ext_resource type="Script" path="res://scripts/platformer/exit_portal.gd" id="5_exit"]
+[ext_resource type="Script" path="res://scripts/platformer/platformer_camera.gd" id="6_camera"]
+[ext_resource type="Script" path="res://scripts/platformer/chromatic_socket.gd" id="7_socket"]
+[ext_resource type="Script" path="res://scripts/platformer/locked_door.gd" id="8_door"]
+[ext_resource type="Script" path="res://scripts/platformer/collectible_shard.gd" id="9_shard"]
+[ext_resource type="Texture2D" path="res://assets/sprites/pip.png" id="10_pip_tex"]
+[ext_resource type="Texture2D" path="res://assets/sprites/blocks.png" id="11_block_tex"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ground"]
+size = Vector2(500, 48)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pedestal"]
+size = Vector2(48, 48)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_block"]
+size = Vector2(16, 16)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_player"]
+size = Vector2(10, 14)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_exit"]
+size = Vector2(16, 24)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_door"]
+size = Vector2(16, 48)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_shard"]
+size = Vector2(12, 12)
+
+[node name="Level03" type="Node2D" node_paths=PackedStringArray("player", "tile_manager", "exit_portal", "camera")]
+script = ExtResource("1_level")
+level_id = "w1_03"
+level_name = "The Conduit Gate"
+world_id = 1
+required_sockets_count = 1
+player = NodePath("Player")
+tile_manager = NodePath("TileManager")
+exit_portal = NodePath("ExitPortal")
+camera = NodePath("Camera2D")
+
+[node name="TileManager" type="Node2D" parent="."]
+script = ExtResource("2_tile_mgr")
+
+[node name="Ground" type="StaticBody2D" parent="TileManager"]
+position = Vector2(250, 216)
+collision_layer = 2
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TileManager/Ground"]
+shape = SubResource("RectangleShape2D_ground")
+
+[node name="Pedestal" type="StaticBody2D" parent="TileManager"]
+position = Vector2(88, 168)
+collision_layer = 2
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TileManager/Pedestal"]
+shape = SubResource("RectangleShape2D_pedestal")
+
+[node name="Block_7_8" type="StaticBody2D" parent="TileManager"]
+position = Vector2(120, 136)
+collision_layer = 2
+collision_mask = 1
+metadata/color = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TileManager/Block_7_8"]
+shape = SubResource("RectangleShape2D_block")
+
+[node name="Sprite2D" type="Sprite2D" parent="TileManager/Block_7_8"]
+modulate = Color(0.23, 0.62, 1, 1)
+texture = ExtResource("11_block_tex")
+
+[node name="Player" type="CharacterBody2D" parent="."]
+position = Vector2(30, 185)
+collision_mask = 2
+script = ExtResource("3_player")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Player"]
+shape = SubResource("RectangleShape2D_player")
+
+[node name="Sprite2D" type="Sprite2D" parent="Player"]
+texture = ExtResource("10_pip_tex")
+
+[node name="PixelGlove" type="Node2D" parent="Player" node_paths=PackedStringArray("player", "tile_manager")]
+script = ExtResource("4_glove")
+player = NodePath("..")
+tile_manager = NodePath("../../TileManager")
+
+[node name="Camera2D" type="Camera2D" parent="." node_paths=PackedStringArray("target")]
+position = Vector2(30, 185)
+script = ExtResource("6_camera")
+target = NodePath("../Player")
+
+[node name="CyanSocket" type="Node2D" parent="."]
+script = ExtResource("7_socket")
+socket_id = "cyan_door"
+required_color = 1
+grid_cell = Vector2i(12, 11)
+
+[node name="LockedDoor" type="StaticBody2D" parent="."]
+position = Vector2(280, 168)
+collision_layer = 2
+script = ExtResource("8_door")
+socket_id = "cyan_door"
+door_size = Vector2(16, 48)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LockedDoor"]
+shape = SubResource("RectangleShape2D_door")
+
+[node name="ExitPortal" type="Area2D" parent="."]
+position = Vector2(400, 180)
+collision_layer = 4
+script = ExtResource("5_exit")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ExitPortal"]
+shape = SubResource("RectangleShape2D_exit")
+
+[node name="Shard1" type="Area2D" parent="."]
+position = Vector2(80, 130)
+collision_layer = 4
+script = ExtResource("9_shard")
+shard_id = "shard_3_1"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Shard1"]
+shape = SubResource("RectangleShape2D_shard")
+
+[node name="Shard2" type="Area2D" parent="."]
+position = Vector2(200, 130)
+collision_layer = 4
+script = ExtResource("9_shard")
+shard_id = "shard_3_2"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Shard2"]
+shape = SubResource("RectangleShape2D_shard")
+
+[node name="Shard3" type="Area2D" parent="."]
+position = Vector2(340, 170)
+collision_layer = 4
+script = ExtResource("9_shard")
+shard_id = "shard_3_3"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Shard3"]
+shape = SubResource("RectangleShape2D_shard")

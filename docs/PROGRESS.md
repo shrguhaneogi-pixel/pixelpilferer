@@ -59,3 +59,19 @@
 - **Godot Native Test Harness:** `tests/test_runner.gd` executes **361 assertions** (resource loading, data structures, invariants, all 28 deterministic tests, demo corridor scenario, 500-step randomized property fuzzing, board rendering, player animation & particles, block views, input handling & buffering, HUD upgrades, sequential demo progression, Phase 4 solver/validator/hint verification tests, Phase 5 campaign & progression tests, and Phase 6 art, animation, audio, and accessibility tests) with 100% success (exit code 0).
 - **Master Test Runner:** `python tests/run_tests.py` executes 79 deterministic test assertions, the vertical slice demo verification suite, 54 Phase 4 solver & validator assertions, and all 23 levels verified solvable with 100% success (exit code 0).
 - **Campaign Audit:** `python tests/test_campaign_audit.py` formally audits all 20 campaign levels against curriculum invariants, bounds, optimal steps, and solution replay verification. Generated `docs/CAMPAIGN_VALIDATION.md`.
+
+---
+
+## 4. 2D Platformer Transformation Milestones
+
+| Milestone | Scope | Status | Notes |
+| :--- | :--- | :---: | :--- |
+| **Phase Zero** | Architecture & Specification | **COMPLETE** | Authored `PLATFORMER_DESIGN.md`, `PLATFORMER_MIGRATION.md`, `PLATFORMER_RISK_REGISTER.md`, and `PLATFORMER_TEST_PLAN.md`. |
+| **Milestone A** | Repository Audit & Migration Plan | **COMPLETE** | Evidence-based architectural inventory, risk mitigation, and decoupled module boundaries. |
+| **Milestone B** | Platformer Movement Prototype | **COMPLETE** | Isolated `CharacterBody2D` test scene (`platformer_prototype.tscn`) verifying horizontal acceleration, friction, jump curves (peak 42.78px), variable jump cutoff (14.13px), wall collision, terminal velocity (340px/s), pit death/respawn, and coyote time (10/10 PASS). |
+| **Milestone C** | Pixel Glove Vertical Slice | **COMPLETE** | "The Broken Crossing" 9-step acceptance test suite in `broken_crossing.tscn`: run, jump to ledge, steal wall block, open path, carry to chasm, place floating platform, cross gap, reach exit, and restart to initial layout (9/9 PASS). |
+| **Milestone D** | Reusable Level Architecture | **COMPLETE** | Built `PlatformerLevel`, `Checkpoint`, `HazardZone`, `CollectibleShard`, `ChromaticSocket`, `LockedDoor`, and `LevelProgressionController`. Authored 3 handcrafted levels (`level_01_stolen_ledge.tscn`, `level_02_hazard_leap.tscn`, `level_03_conduit_gate.tscn`) and 3-tier validation harness (`test_platformer_milestone_d.gd`: 74/74 PASS). |
+| **Milestone E** | Gameplay Feel & Visual Identity | *Pending* | Tilesets, Pip animations, parallax background, distinct world palettes, audio modulation. |
+| **Milestone F** | Complete Campaign | *Pending* | 20 handcrafted platformer campaign levels across 4 worlds. |
+| **Milestone G** | Accessibility, Menus, Saves & Export | *Pending* | Main menu, pause, level select, progress persistence, desktop/web release packaging. |
+
