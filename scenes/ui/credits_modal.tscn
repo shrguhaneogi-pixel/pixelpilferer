@@ -1,0 +1,75 @@
+[gd_scene load_steps=2 format=3 uid="uid://c7v9x2y4m8n3d"]
+
+[ext_resource type="Script" path="res://scripts/ui/credits_modal.gd" id="1_credits"]
+
+[node name="CreditsModal" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_credits")
+
+[node name="Backdrop" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.7)
+
+[node name="Panel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -180.0
+offset_top = -120.0
+offset_right = 180.0
+offset_bottom = 120.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.898, 1, 1)
+text = "PIXEL PILFERER — CREDITS"
+horizontal_alignment = 1
+
+[node name="Content" type="Label" parent="Panel/Margin/VBox"]
+layout_mode = 2
+text = "A 2D Grid-Based Puzzle Adventure
+
+Game Direction & Engineering:
+Google DeepMind Antigravity AI Director
+
+Engine: Godot Engine 4.7.2 (GDScript)
+Art & Sound: Original Procedural Synthesis
+
+Concept:
+\"Steal the world. Rebuild your escape.\"
+
+Special Thanks to the Godot & Open-Source Community!"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="CloseBtn" type="Button" parent="Panel/Margin/VBox"]
+custom_minimum_size = Vector2(80, 26)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Back"

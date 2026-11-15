@@ -22,6 +22,7 @@ func _init() -> void:
 	_test_phase4_solver_and_validation()
 	_test_phase5_campaign_and_progression()
 	_test_phase6_art_animation_audio()
+	_test_phase7_ui_progression_persistence()
 	
 	print("\n-------------------------------------------")
 	print("Total tests executed: %d | Failed: %d" % [_total_tests, _failed_tests])
@@ -1316,6 +1317,151 @@ func _test_phase6_art_animation_audio() -> void:
 	_assert_true(loaded_p["settings"].has("music_volume"), "Settings contains music_volume")
 	_assert_true(loaded_p["settings"].has("screen_shake"), "Settings contains screen_shake")
 	s_menu.queue_free()
+
+func _test_phase7_ui_progression_persistence() -> void:
+	print("\n=== 11. Verifying Phase 7 UI, UX, Persistence, Medals, and Pause System ===")
+	
+	# 1. UI Scene Loading
+	var pause_res = ResourceLoader.load("res://scenes/ui/pause_menu.tscn")
+	_assert_true(pause_res != null, "PauseMenu scene (res://scenes/ui/pause_menu.tscn) loads successfully")
+	var confirm_res = ResourceLoader.load("res://scenes/ui/confirm_modal.tscn")
+	_assert_true(confirm_res != null, "ConfirmModal scene (res://scenes/ui/confirm_modal.tscn) loads successfully")
+	var credits_res = ResourceLoader.load("res://scenes/ui/credits_modal.tscn")
+	_assert_true(credits_res != null, "CreditsModal scene (res://scenes/ui/credits_modal.tscn) loads successfully")
+
+	# 2. Persistence Schema, Validation, and Defaults
+	ProgressService.reset_progress()
+	var init_data := ProgressService.load_progress()
+	_assert_eq(init_data.get("schema_version", -1), 1, "Save data initialized with Schema Version 1")
+	_assert_true(not ProgressService.has_saved_game(), "Fresh install has no saved game progress")
+	_assert_true(ProgressService.is_level_unlocked(1, 0), "First level (ch1_01) unlocked by default")
+	_assert_true(not ProgressService.is_level_unlocked(1, 1), "Second level (ch1_02) locked by default")
+	
+	# Schema validation tests
+	_assert_true(not ProgressService._validate_save_dict({}), "Empty dictionary fails schema validation")
+	_assert_true(not ProgressService._validate_save_dict({"schema_version": "invalid"}), "Non-numeric schema version rejected")
+	_assert_true(ProgressService._validate_save_dict({"schema_version": 1, "completed_levels": {}, "settings": {}}), "Valid schema dictionary passes validation")
+
+	# Record progress & continue logic
+	ProgressService.record_level_completion("ch1_01", 5, "ch1_02")
+	_assert_true(ProgressService.has_saved_game(), "has_saved_game is true after completing a level")
+	_assert_true(ProgressService.is_level_unlocked(1, 1), "Level ch1_02 unlocked after recording completion")
+	var cont_target: Dictionary = ProgressService.get_continue_target()
+	_assert_eq(cont_target.get("level_id", ""), "ch1_02", "Continue target resolves to ch1_02")
+	_assert_eq(cont_target.get("chapter", -1), 1, "Continue target chapter is 1")
+	_assert_eq(cont_target.get("level_idx", -1), 1, "Continue target level index is 1")
+
+	# 3. Solvability Medals & Optimal Moves Calculation
+	var all_levels: Array[String] = [
+		"demo_01", "demo_02", "demo_03",
+		"ch1_01", "ch1_02", "ch1_03", "ch1_04", "ch1_05",
+		"ch2_01", "ch2_02", "ch2_03", "ch2_04", "ch2_05",
+		"ch3_01", "ch3_02", "ch3_03", "ch3_04", "ch3_05",
+		"ch4_01", "ch4_02", "ch4_03", "ch4_04", "ch4_05"
+	]
+	var all_opts_valid := true
+	for lid in all_levels:
+		if ProgressService.get_optimal_moves(lid) <= 0:
+			all_opts_valid = false
+	_assert_true(all_opts_valid, "All 23 campaign levels have positive optimal move baselines")
+
+	# Medal evaluations for ch1_01 (optimal = 5)
+	_assert_eq(ProgressService.get_level_medal("ch1_01", 5), "Gold", "Exact optimal moves awards Gold Medal")
+	_assert_eq(ProgressService.get_level_medal("ch1_01", 8), "Silver", "Optimal + 3 moves awards Silver Medal")
+	_assert_eq(ProgressService.get_level_medal("ch1_01", 9), "Bronze", "Optimal + 4 moves awards Bronze Medal")
+	_assert_eq(ProgressService.get_medal_symbol("Gold"), "★", "Gold symbol is ★")
+	_assert_eq(ProgressService.get_medal_symbol("Silver"), "◈", "Silver symbol is ◈")
+	_assert_eq(ProgressService.get_medal_symbol("Bronze"), "•", "Bronze symbol is •")
+
+	# 4. In-Game Contextual Tutorial Tracking
+	var tut_text_demo := ProgressService.get_tutorial_text("demo_01")
+	_assert_true(not tut_text_demo.is_empty(), "Contextual tutorial exists for demo_01")
+	_assert_true(not ProgressService.is_tutorial_seen("demo_01"), "Tutorial unseen initially")
+	ProgressService.mark_tutorial_seen("demo_01")
+	_assert_true(ProgressService.is_tutorial_seen("demo_01"), "Tutorial marked as seen persists")
+	var tut_text_ch2 := ProgressService.get_tutorial_text("ch2_01")
+	_assert_true(tut_text_ch2.contains("Bridge"), "Chapter 2 tutorial explains bridges")
+
+	# 5. TitleScreen UI Component Verification
+	var title_scene: PackedScene = ResourceLoader.load("res://scenes/ui/title_screen.tscn")
+	var title_ui: TitleScreen = title_scene.instantiate()
+	title_ui._ready()
+	_assert_true(title_ui.continue_btn != null, "TitleScreen has Continue button")
+	_assert_true(title_ui.new_game_btn != null, "TitleScreen has New Game button")
+	_assert_true(title_ui.credits_modal != null, "TitleScreen contains CreditsModal")
+	_assert_true(title_ui.confirm_modal != null, "TitleScreen contains ConfirmModal")
+	_assert_true(not title_ui.continue_btn.disabled, "Continue button enabled when saved game exists")
+	title_ui.queue_free()
+
+	# 6. ChapterSelect UI Component Verification
+	var ch_scene: PackedScene = ResourceLoader.load("res://scenes/ui/chapter_select.tscn")
+	var ch_ui: ChapterSelect = ch_scene.instantiate()
+	ch_ui._ready()
+	_assert_true(ch_ui.chapter_list != null, "ChapterSelect has chapter list")
+	_assert_eq(ProgressService.get_chapter_completed_count(1), 1, "Chapter 1 completed count reflects progress (1/5)")
+	ch_ui.queue_free()
+
+	# 7. HUD Tutorial & Win Modal Verification
+	var hud_scene: PackedScene = ResourceLoader.load("res://scenes/ui/hud.tscn")
+	var hud_inst: HUD = hud_scene.instantiate()
+	hud_inst._ready()
+	_assert_true(hud_inst.pause_btn != null, "HUD has Pause button")
+	_assert_true(hud_inst.tutorial_panel != null, "HUD has Tutorial Panel")
+	
+	hud_inst.show_tutorial("Steal blocks to clear the corridor.")
+	_assert_true(hud_inst.tutorial_panel.visible, "HUD displays tutorial banner")
+	_assert_eq(hud_inst.tutorial_label.text, "Steal blocks to clear the corridor.", "Tutorial label text populated")
+	hud_inst.hide_tutorial()
+	_assert_true(not hud_inst.tutorial_panel.visible, "HUD hides tutorial banner cleanly")
+	
+	hud_inst.show_win(5, "ch1_01")
+	_assert_true(hud_inst.win_modal.visible, "WinModal visible on level victory")
+	_assert_true(hud_inst.win_medal_label.text.contains("GOLD"), "WinModal displays GOLD MEDAL for 5 moves")
+	hud_inst.hide_win()
+	_assert_true(not hud_inst.win_modal.visible, "WinModal hidden cleanly")
+	hud_inst.queue_free()
+
+	# 8. PauseMenu Verification
+	var pause_scene: PackedScene = ResourceLoader.load("res://scenes/ui/pause_menu.tscn")
+	var pause_inst: PauseMenu = pause_scene.instantiate()
+	pause_inst._ready()
+	_assert_true(pause_inst.resume_btn != null, "PauseMenu has Resume button")
+	_assert_true(pause_inst.restart_btn != null, "PauseMenu has Restart button")
+	_assert_true(pause_inst.hint_btn != null, "PauseMenu has Hint button")
+	_assert_true(pause_inst.settings_btn != null, "PauseMenu has Settings button")
+	_assert_true(pause_inst.chapters_btn != null, "PauseMenu has Chapter Select button")
+	_assert_true(pause_inst.title_btn != null, "PauseMenu has Title Screen button")
+	pause_inst.queue_free()
+
+	# 9. GameController Deterministic Pause & State Preservation
+	var gc := GameController.new()
+	gc._ready()
+	var demo_lvl := LevelRepository.load_level(0, 0)
+	gc.load_level_data(demo_lvl)
+	var initial_pos: Vector2i = gc.model.get_state().player_pos
+	
+	# Pause gameplay
+	gc.set_paused(true)
+	_assert_true(gc.is_paused, "GameController is_paused is true")
+	
+	# Attempt action while paused
+	gc.request_action(Constants.ActionType.INTERACT_EAST)
+	_assert_true(gc.model.get_state().carried_block.is_empty(), "Carried block remains empty while paused")
+	_assert_eq(gc.model.get_state().turn_count, 0, "Turn count completely frozen while paused")
+	
+	# Resume gameplay
+	gc.set_paused(false)
+	_assert_true(not gc.is_paused, "GameController is_paused is false after resume")
+	gc.request_action(Constants.ActionType.INTERACT_EAST)
+	_assert_true(not gc.model.get_state().carried_block.is_empty(), "Block stolen after unpausing")
+	_assert_eq(gc.model.get_state().turn_count, 1, "Turn count advances after unpausing")
+	
+	# Move into now-cleared floor
+	gc.request_action(Constants.ActionType.MOVE_EAST)
+	_assert_eq(gc.model.get_state().player_pos, initial_pos + Constants.DIR_EAST, "Player moves East into cleared corridor")
+	_assert_eq(gc.model.get_state().turn_count, 2, "Turn count is 2 after moving")
+	
+	gc.queue_free()
 
 
 

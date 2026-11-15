@@ -1,6 +1,7 @@
 class_name MainGame extends Node2D
 
 ## Main entry orchestrator for Pixel Pilferer.
+## Manages TitleScreen, ChapterSelect, GameController, HUD, PauseMenu, and SettingsMenu.
 
 var _current_chapter: int = 0
 var _current_level_idx: int = 0
@@ -10,6 +11,7 @@ var hud_node: HUD
 var title_screen: TitleScreen
 var chapter_select: ChapterSelect
 var settings_menu: SettingsMenu
+var pause_menu: PauseMenu
 
 func _ready() -> void:
 	_setup_subsystems()
@@ -24,7 +26,7 @@ func _setup_subsystems() -> void:
 	game_controller.turn_updated.connect(_on_turn_updated)
 	game_controller.state_updated.connect(_on_state_updated)
 	game_controller.hint_triggered.connect(_on_hint_triggered)
-	game_controller.menu_requested.connect(_show_chapter_select)
+	game_controller.menu_requested.connect(_open_pause_menu)
 	add_child(game_controller)
 	if game_controller.renderer:
 		game_controller.renderer.visible = false
@@ -40,19 +42,37 @@ func _setup_subsystems() -> void:
 		hud_node = hud_packed.instantiate() as HUD
 		hud_node.name = "HUD"
 		hud_node.restart_pressed.connect(func(): game_controller.handle_restart())
+		hud_node.retry_pressed.connect(func(): game_controller.handle_restart())
 		hud_node.undo_pressed.connect(func(): game_controller.handle_undo())
 		hud_node.hint_pressed.connect(func(): game_controller.handle_hint())
-		hud_node.menu_pressed.connect(_show_chapter_select)
+		hud_node.pause_pressed.connect(_open_pause_menu)
+		hud_node.chapter_select_pressed.connect(_show_chapter_select)
 		hud_node.next_level_pressed.connect(_advance_next_level)
+		hud_node.tutorial_dismissed.connect(_on_tutorial_dismissed)
 		canvas.add_child(hud_node)
 		hud_node.visible = false
 	
+	# Pause Menu
+	var pause_packed = load("res://scenes/ui/pause_menu.tscn")
+	if pause_packed:
+		pause_menu = pause_packed.instantiate() as PauseMenu
+		pause_menu.name = "PauseMenu"
+		pause_menu.resume_pressed.connect(_on_pause_resume)
+		pause_menu.restart_pressed.connect(_on_pause_restart)
+		pause_menu.hint_pressed.connect(_on_pause_hint)
+		pause_menu.settings_pressed.connect(_show_settings)
+		pause_menu.chapter_select_pressed.connect(_on_pause_chapter_select)
+		pause_menu.title_screen_pressed.connect(_on_pause_title_screen)
+		canvas.add_child(pause_menu)
+		pause_menu.visible = false
+
 	# Title Screen
 	var title_packed = load("res://scenes/ui/title_screen.tscn")
 	if title_packed:
 		title_screen = title_packed.instantiate() as TitleScreen
 		title_screen.name = "TitleScreen"
-		title_screen.start_adventure_pressed.connect(_start_adventure)
+		title_screen.continue_game_pressed.connect(_on_continue_game)
+		title_screen.new_game_pressed.connect(_on_new_game)
 		title_screen.chapter_select_pressed.connect(_show_chapter_select)
 		title_screen.settings_pressed.connect(_show_settings)
 		canvas.add_child(title_screen)
@@ -99,9 +119,12 @@ func _apply_saved_settings() -> void:
 			game_controller.renderer.screen_shake_enabled = ss
 
 func _show_title_screen() -> void:
-	if title_screen: title_screen.visible = true
+	if title_screen:
+		title_screen.update_button_states()
+		title_screen.visible = true
 	if chapter_select: chapter_select.visible = false
 	if settings_menu: settings_menu.visible = false
+	if pause_menu: pause_menu.visible = false
 	if hud_node: hud_node.visible = false
 	if game_controller and game_controller.renderer: game_controller.renderer.visible = false
 
@@ -109,8 +132,10 @@ func _show_chapter_select() -> void:
 	if title_screen: title_screen.visible = false
 	if chapter_select:
 		chapter_select.visible = true
+		chapter_select._populate_chapters()
 		chapter_select._populate_levels()
 	if settings_menu: settings_menu.visible = false
+	if pause_menu: pause_menu.visible = false
 	if hud_node: hud_node.visible = false
 	if game_controller and game_controller.renderer: game_controller.renderer.visible = false
 
@@ -122,9 +147,54 @@ func _show_settings() -> void:
 func _on_settings_closed(_settings: Dictionary) -> void:
 	_apply_saved_settings()
 
-func _start_adventure() -> void:
-	# Launching Start Adventure starts at Demo Level 0 (demo_01)
+func _on_continue_game() -> void:
+	var target: Dictionary = ProgressService.get_continue_target()
+	_load_specific_level(target.get("chapter", 1), target.get("level_idx", 0))
+
+func _on_new_game() -> void:
 	_load_specific_level(0, 0)
+
+func _open_pause_menu() -> void:
+	if pause_menu and hud_node and hud_node.visible:
+		if game_controller:
+			game_controller.set_paused(true)
+		pause_menu.visible = true
+
+func _on_pause_resume() -> void:
+	if pause_menu:
+		pause_menu.visible = false
+	if game_controller:
+		game_controller.set_paused(false)
+
+func _on_pause_restart() -> void:
+	_on_pause_resume()
+	if game_controller:
+		game_controller.handle_restart()
+
+func _on_pause_hint() -> void:
+	_on_pause_resume()
+	if game_controller:
+		game_controller.handle_hint()
+
+func _on_pause_chapter_select() -> void:
+	if pause_menu:
+		pause_menu.visible = false
+	if game_controller:
+		game_controller.set_paused(false)
+	_show_chapter_select()
+
+func _on_pause_title_screen() -> void:
+	if pause_menu:
+		pause_menu.visible = false
+	if game_controller:
+		game_controller.set_paused(false)
+	_show_title_screen()
+
+func _on_tutorial_dismissed() -> void:
+	var lvl: Dictionary = LevelRepository.load_level(_current_chapter, _current_level_idx)
+	var lvl_id: String = lvl.get("id", "")
+	if lvl_id != "":
+		ProgressService.mark_tutorial_seen(lvl_id)
 
 func _load_specific_level(chapter_num: int, level_idx: int) -> void:
 	_current_chapter = chapter_num
@@ -138,8 +208,10 @@ func _load_specific_level(chapter_num: int, level_idx: int) -> void:
 	if title_screen: title_screen.visible = false
 	if chapter_select: chapter_select.visible = false
 	if settings_menu: settings_menu.visible = false
+	if pause_menu: pause_menu.visible = false
 	
 	if game_controller:
+		game_controller.set_paused(false)
 		if game_controller.renderer: game_controller.renderer.visible = true
 		game_controller.load_level_data(lvl)
 	
@@ -154,6 +226,18 @@ func _load_specific_level(chapter_num: int, level_idx: int) -> void:
 		hud_node.update_turn_count(0)
 		hud_node.hide_hint()
 		hud_node.hide_win()
+		
+		# Check for tutorial hint
+		var lvl_id: String = lvl.get("id", "")
+		if not ProgressService.is_tutorial_seen(lvl_id):
+			var tut: String = ProgressService.get_tutorial_text(lvl_id)
+			if tut != "":
+				hud_node.show_tutorial(tut)
+			else:
+				hud_node.hide_tutorial()
+		else:
+			hud_node.hide_tutorial()
+			
 		if game_controller and game_controller.model:
 			hud_node.update_state(game_controller.model.get_state())
 
@@ -164,6 +248,10 @@ func _on_turn_updated(turns: int) -> void:
 func _on_state_updated(state: BoardState) -> void:
 	if hud_node:
 		hud_node.update_state(state)
+		# Auto-dismiss tutorial after player makes an active turn
+		if state.turn_count > 0 and hud_node.tutorial_panel and hud_node.tutorial_panel.visible:
+			_on_tutorial_dismissed()
+			hud_node.hide_tutorial()
 
 func _on_hint_triggered(hint_text: String) -> void:
 	if hud_node:
@@ -190,7 +278,7 @@ func _on_level_completed(turns: int) -> void:
 	if is_chapter_ending and game_controller and game_controller.audio:
 		game_controller.audio.play_chapter_restored()
 	if hud_node:
-		hud_node.show_win(turns, is_campaign_ending, ProgressService.get_total_moves())
+		hud_node.show_win(turns, lvl_id, is_campaign_ending, ProgressService.get_total_moves())
 
 func _advance_next_level() -> void:
 	var ch_data := LevelRepository.load_chapter(_current_chapter)

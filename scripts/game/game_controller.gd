@@ -26,8 +26,14 @@ var audio: AudioService
 var current_level_dict: Dictionary = {}
 
 var is_animating: bool = false
+var is_paused: bool = false
 var _input_buffer: int = -1
 var _buffer_timestamp: float = 0.0
+
+func set_paused(paused: bool) -> void:
+	is_paused = paused
+	if is_paused:
+		_input_buffer = -1
 
 func _init() -> void:
 	_ensure_subsystems()
@@ -86,6 +92,11 @@ func load_level_data(dict: Dictionary) -> void:
 	state_updated.emit(initial_state)
 
 func _unhandled_input(event: InputEvent) -> void:
+	if is_paused:
+		if event.is_action_pressed(&"pause") or (event is InputEventKey and event.is_pressed() and not event.is_echo() and (event.keycode == KEY_ESCAPE or event.physical_keycode == KEY_ESCAPE)):
+			menu_requested.emit()
+		return
+		
 	if model == null or model.is_completed():
 		return
 		
@@ -156,6 +167,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		request_action(action)
 
 func request_action(action: int) -> void:
+	if is_paused:
+		return
 	if is_animating:
 		_input_buffer = action
 		_buffer_timestamp = Time.get_ticks_msec() / 1000.0

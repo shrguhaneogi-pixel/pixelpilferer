@@ -52,10 +52,15 @@ func _populate_chapters() -> void:
 		var ch_num: int = ch["num"]
 		var prefix: String = "Demo" if ch_num == 0 else "Chapter %d" % ch_num
 		var status_marker: String = ""
+		var count: int = ProgressService.get_chapter_completed_count(ch_num)
+		var total: int = 3 if ch_num == 0 else 5
 		if ProgressService.is_chapter_completed(ch_num):
-			status_marker = " ★ [RESTORED]"
+			status_marker = " ★ [RESTORED %d/%d]" % [count, total]
+		else:
+			status_marker = " [%d/%d]" % [count, total]
 		chapter_list.add_item("%s: %s%s" % [prefix, ch["title"], status_marker])
-	chapter_list.item_selected.connect(_on_chapter_selected)
+	if not chapter_list.item_selected.is_connected(_on_chapter_selected):
+		chapter_list.item_selected.connect(_on_chapter_selected)
 
 func _on_chapter_selected(index: int) -> void:
 	if index >= 0 and index < CHAPTER_DATA.size():
@@ -91,7 +96,7 @@ func _populate_levels() -> void:
 		var lvl_id: String = lvl.get("id", "")
 		var btn := Button.new()
 		btn.focus_mode = Control.FOCUS_NONE
-		btn.custom_minimum_size = Vector2(120, 32)
+		btn.custom_minimum_size = Vector2(130, 32)
 		
 		var is_unlocked: bool = ProgressService.is_level_unlocked(_selected_chapter, lvl_idx)
 		var is_done: bool = completed.has(lvl_id)
@@ -103,8 +108,19 @@ func _populate_levels() -> void:
 			label_str = "Level %d-%d" % [_selected_chapter, lvl_idx + 1]
 			
 		if is_done:
-			btn.text = "%s ★ (%d)" % [label_str, completed[lvl_id]]
-			btn.modulate = Color(0.9, 1.0, 0.8)
+			var turns: int = completed[lvl_id]
+			var medal: String = ProgressService.get_level_medal(lvl_id, turns)
+			var symbol: String = ProgressService.get_medal_symbol(medal)
+			btn.text = "%s %s (%d)" % [label_str, symbol, turns]
+			match medal:
+				"Gold":
+					btn.modulate = Color(1.0, 0.95, 0.6)
+				"Silver":
+					btn.modulate = Color(0.85, 0.92, 1.0)
+				"Bronze":
+					btn.modulate = Color(0.95, 0.82, 0.7)
+				_:
+					btn.modulate = Color(0.9, 1.0, 0.8)
 			btn.disabled = false
 		elif is_unlocked:
 			btn.text = label_str

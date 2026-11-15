@@ -96,3 +96,12 @@ static func color_name(color: int) -> String:
 		BlockColor.MAGENTA: return "Magenta"
 		BlockColor.EMERALD: return "Emerald"
 		_: return "Unknown"
+
+static func color_symbol(color: int) -> String:
+	match color:
+		BlockColor.NEUTRAL: return "◆"
+		BlockColor.CYAN: return "▲"
+		BlockColor.AMBER: return "■"
+		BlockColor.MAGENTA: return "●"
+		BlockColor.EMERALD: return "✚"
+		_: return "?"

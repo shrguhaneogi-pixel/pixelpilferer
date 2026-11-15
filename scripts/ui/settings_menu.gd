@@ -8,6 +8,7 @@ signal settings_closed(updated_settings: Dictionary)
 @onready var music_enable_check: CheckBox = $Panel/VBox/MusicEnableRow/CheckBox
 @onready var reduced_motion_check: CheckBox = $Panel/VBox/MotionRow/CheckBox
 @onready var shake_check: CheckBox = $Panel/VBox/ShakeRow/CheckBox
+@onready var high_contrast_check: CheckBox = $Panel/VBox/HighContrastRow/CheckBox
 
 var current_settings: Dictionary = {}
 
@@ -38,6 +39,8 @@ func load_settings() -> void:
 		reduced_motion_check.button_pressed = current_settings.get("reduced_motion", false)
 	if shake_check:
 		shake_check.button_pressed = current_settings.get("screen_shake", true)
+	if high_contrast_check:
+		high_contrast_check.button_pressed = current_settings.get("high_contrast", false)
 
 func save_and_close() -> void:
 	if sfx_volume_slider:
@@ -52,6 +55,8 @@ func save_and_close() -> void:
 		current_settings["reduced_motion"] = reduced_motion_check.button_pressed
 	if shake_check:
 		current_settings["screen_shake"] = shake_check.button_pressed
+	if high_contrast_check:
+		current_settings["high_contrast"] = high_contrast_check.button_pressed
 		
 	var data := ProgressService.load_progress()
 	data["settings"] = current_settings
