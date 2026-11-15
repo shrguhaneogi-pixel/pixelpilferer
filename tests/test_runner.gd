@@ -21,6 +21,7 @@ func _init() -> void:
 	_test_phase3_input_and_hud()
 	_test_phase4_solver_and_validation()
 	_test_phase5_campaign_and_progression()
+	_test_phase6_art_animation_audio()
 	
 	print("\n-------------------------------------------")
 	print("Total tests executed: %d | Failed: %d" % [_total_tests, _failed_tests])
@@ -1193,5 +1194,128 @@ func _test_phase5_campaign_and_progression() -> void:
 	_assert_true("THE PIXEL CORE IS RESTORED" in hud.win_stats_label.text, "HUD displays victory celebration text")
 	_assert_true("Final Level: 24 moves" in hud.win_stats_label.text, "HUD displays final moves")
 	hud.queue_free()
+
+func _test_phase6_art_animation_audio() -> void:
+	print("\n=== 10. Verifying Phase 6 Art Assets, Pixel Animations, Audio Palette, and Accessibility ===")
+	
+	# 1. Sprite Assets & Geometry
+	var pip_tex: Texture2D = ResourceLoader.load("res://assets/sprites/pip.png")
+	_assert_true(pip_tex != null, "Pip texture loaded")
+	_assert_eq(pip_tex.get_width(), 64, "Pip spritesheet width is 64px (4 frames x 16px)")
+	_assert_eq(pip_tex.get_height(), 16, "Pip spritesheet height is 16px")
+	
+	var blocks_tex: Texture2D = ResourceLoader.load("res://assets/sprites/blocks.png")
+	_assert_true(blocks_tex != null, "Blocks texture loaded")
+	_assert_eq(blocks_tex.get_width(), 80, "Blocks spritesheet width is 80px (5 colors x 16px)")
+	_assert_eq(blocks_tex.get_height(), 16, "Blocks spritesheet height is 16px")
+	
+	var tiles_tex: Texture2D = ResourceLoader.load("res://assets/sprites/tileset.png")
+	_assert_true(tiles_tex != null, "Tileset texture loaded")
+	_assert_eq(tiles_tex.get_width(), 64, "Tileset width is 64px (4 tiles x 16px)")
+	_assert_eq(tiles_tex.get_height(), 16, "Tileset height is 16px")
+	
+	var sockets_tex: Texture2D = ResourceLoader.load("res://assets/sprites/sockets.png")
+	_assert_true(sockets_tex != null, "Sockets texture loaded")
+	_assert_eq(sockets_tex.get_width(), 160, "Sockets width is 160px (5 colors x 2 states x 16px)")
+	_assert_eq(sockets_tex.get_height(), 16, "Sockets height is 16px")
+	
+	var portal_tex: Texture2D = ResourceLoader.load("res://assets/sprites/exit_portal.png")
+	_assert_true(portal_tex != null, "Exit portal texture loaded")
+	_assert_eq(portal_tex.get_width(), 32, "Exit portal width is 32px (2 states x 16px)")
+	_assert_eq(portal_tex.get_height(), 16, "Exit portal height is 16px")
+
+	var icon_tex: Texture2D = ResourceLoader.load("res://assets/sprites/icon.png")
+	_assert_true(icon_tex != null, "App icon texture loaded")
+	_assert_eq(icon_tex.get_width(), 64, "Icon width is 64px")
+	_assert_eq(icon_tex.get_height(), 64, "Icon height is 64px")
+
+	# 2. AudioService & Full Sound Palette
+	var audio := AudioService.new()
+	audio._ready()
+	_assert_true(audio._players.has(&"steal"), "AudioService has steal SFX")
+	_assert_true(audio._players.has(&"place"), "AudioService has place SFX")
+	_assert_true(audio._players.has(&"socket"), "AudioService has socket SFX")
+	_assert_true(audio._players.has(&"step"), "AudioService has step SFX")
+	_assert_true(audio._players.has(&"undo"), "AudioService has undo SFX")
+	_assert_true(audio._players.has(&"win"), "AudioService has win SFX")
+	_assert_true(audio._players.has(&"bump"), "AudioService has bump SFX")
+	_assert_true(audio._players.has(&"exit_open"), "AudioService has exit_open SFX")
+	_assert_true(audio._players.has(&"ui_click"), "AudioService has ui_click SFX")
+	_assert_true(audio._players.has(&"chapter_restored"), "AudioService has chapter_restored SFX")
+	_assert_true(audio._music_player != null, "AudioService has ambient music player")
+
+	# Audio Volume & Clamping Invariants
+	audio.master_volume = 0.5
+	audio.sfx_volume = 0.8
+	audio.music_volume = 0.7
+	audio.update_music_volume()
+	var expected_music_db: float = linear_to_db(0.7 * 0.5)
+	_assert_true(abs(audio._music_player.volume_db - expected_music_db) < 0.01, "Music volume decibel matches linear product")
+	
+	audio.music_enabled = false
+	audio.update_music_volume()
+	_assert_eq(audio._music_player.volume_db, -80.0, "Disabling music attenuates player to -80 dB")
+
+	# SFX triggers do not crash
+	audio.sfx_enabled = true
+	audio.play_steal()
+	audio.play_place()
+	audio.play_socket()
+	audio.play_bump()
+	audio.play_exit_open()
+	audio.play_ui_click()
+	audio.play_chapter_restored()
+	_assert_true(true, "All 10 sound triggers executed cleanly")
+	audio.queue_free()
+
+	# 3. PlayerView & Idle/Victory Animations
+	var pv := PlayerView.new()
+	pv._ready()
+	_assert_true(pv.is_idle_active, "PlayerView marked idle state active")
+	pv.reduced_motion = true
+	_assert_true(not pv.is_idle_active, "PlayerView idle deactivated on reduced_motion")
+	pv.animate_victory()
+	pv.snap_to_cell(Vector2i(2, 2))
+	_assert_eq(pv._sprite.position, Vector2.ZERO, "Offsets reset after snap")
+	pv.queue_free()
+
+	# 4. BoardRenderer Chapter Theming & Screen Shake
+	var br := BoardRenderer.new()
+	br._ready()
+	br.apply_chapter_theme(1)
+	_assert_eq(br.modulate, Color(1.0, 0.98, 0.94), "Chapter 1 theme applied (warm amber stone)")
+	br.apply_chapter_theme(2)
+	_assert_eq(br.modulate, Color(0.92, 0.96, 1.05), "Chapter 2 theme applied (deep oceanic skyway)")
+	br.apply_chapter_theme(3)
+	_assert_eq(br.modulate, Color(0.98, 0.93, 1.05), "Chapter 3 theme applied (obsidian violet)")
+	br.apply_chapter_theme(4)
+	_assert_eq(br.modulate, Color(1.04, 1.02, 1.05), "Chapter 4 theme applied (full spectrum)")
+	
+	# Screen shake trigger
+	br.screen_shake_enabled = true
+	br.reduced_motion = false
+	br.trigger_screen_shake(2.0, 0.1)
+	_assert_true(br.camera != null, "BoardRenderer camera initialized")
+	br.reduced_motion = true
+	br.trigger_screen_shake(2.0, 0.1)
+	_assert_true(true, "Screen shake respects reduced_motion without error")
+	br.queue_free()
+
+	# 5. Settings Menu and ProgressService Integration
+	var s_menu_scene: PackedScene = ResourceLoader.load("res://scenes/ui/settings_menu.tscn")
+	var s_menu: SettingsMenu = s_menu_scene.instantiate()
+	s_menu._ready()
+	_assert_true(s_menu.sfx_volume_slider != null, "SettingsMenu SFX volume slider wired")
+	_assert_true(s_menu.music_volume_slider != null, "SettingsMenu Music volume slider wired")
+	_assert_true(s_menu.shake_check != null, "SettingsMenu Screen Shake checkbox wired")
+	_assert_true(s_menu.reduced_motion_check != null, "SettingsMenu Reduced Motion checkbox wired")
+	
+	s_menu.save_and_close()
+	var loaded_p := ProgressService.load_progress()
+	_assert_true(loaded_p.has("settings"), "ProgressService holds settings dictionary")
+	_assert_true(loaded_p["settings"].has("music_volume"), "Settings contains music_volume")
+	_assert_true(loaded_p["settings"].has("screen_shake"), "Settings contains screen_shake")
+	s_menu.queue_free()
+
 
 

@@ -1,19 +1,32 @@
 class_name PlayerView extends Node2D
 
-## Visual representation of Pip: movement tweens, 4-directional facing, carried fragments, and interaction feedback.
+## Visual representation of Pip: movement tweens, 4-directional facing, carried fragments, idle bobbing, and interaction feedback.
 
 signal move_completed
 
 @export var tile_size: int = 16
 @export var move_duration: float = 0.12
-@export var reduced_motion: bool = false
+@export var reduced_motion: bool = false:
+	set(val):
+		reduced_motion = val
+		if val:
+			_stop_idle()
+		elif is_inside_tree():
+			_start_idle()
 
 var _sprite: Sprite2D
 var _carried_sprite: Sprite2D
 var _active_tween: Tween
+var _idle_tween: Tween
 var _current_cell: Vector2i = Vector2i.ZERO
+var is_idle_active: bool = false
 
-func _ready() -> void:
+func _init() -> void:
+	_init_sprites()
+
+func _init_sprites() -> void:
+	if _sprite != null:
+		return
 	# Main Pip sprite (4 directions: South=0, East=1, North=2, West=3)
 	_sprite = Sprite2D.new()
 	if ResourceLoader.exists("res://assets/sprites/pip.png"):
@@ -36,6 +49,11 @@ func _ready() -> void:
 	_carried_sprite.visible = false
 	add_child(_carried_sprite)
 
+func _ready() -> void:
+	_init_sprites()
+	if not reduced_motion:
+		_start_idle()
+
 func set_facing(direction: Vector2i) -> void:
 	if _sprite == null:
 		return
@@ -51,15 +69,49 @@ func set_facing(direction: Vector2i) -> void:
 func cancel_tweens() -> void:
 	if _active_tween and _active_tween.is_valid():
 		_active_tween.kill()
+	_reset_offsets()
+
+func _reset_offsets() -> void:
+	if _sprite:
+		_sprite.position = Vector2.ZERO
+	if _carried_sprite:
+		_carried_sprite.position = Vector2(0, -12)
+
+func _stop_idle() -> void:
+	is_idle_active = false
+	if _idle_tween and _idle_tween.is_valid():
+		_idle_tween.kill()
+	_reset_offsets()
+
+func _start_idle() -> void:
+	if reduced_motion or _sprite == null or _carried_sprite == null:
+		is_idle_active = false
+		return
+	is_idle_active = true
+	if not is_inside_tree():
+		return
+	if _idle_tween and _idle_tween.is_valid():
+		_idle_tween.kill()
+		
+	_idle_tween = create_tween().set_loops()
+	_idle_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_idle_tween.tween_property(_sprite, ^"position:y", -1.0, 0.6)
+	_idle_tween.parallel().tween_property(_carried_sprite, ^"position:y", -13.0, 0.6)
+	_idle_tween.chain().tween_property(_sprite, ^"position:y", 0.0, 0.6)
+	_idle_tween.parallel().tween_property(_carried_sprite, ^"position:y", -12.0, 0.6)
 
 func snap_to_cell(cell: Vector2i, facing: Vector2i = Constants.DIR_SOUTH) -> void:
 	cancel_tweens()
+	_stop_idle()
 		
 	_current_cell = cell
 	position = Vector2(cell * tile_size) + Vector2(tile_size * 0.5, tile_size * 0.5)
 	set_facing(facing)
 	if _carried_sprite != null:
 		_carried_sprite.scale = Vector2(0.75, 0.75)
+		
+	if not reduced_motion:
+		_start_idle()
 
 func animate_move(target_cell: Vector2i, facing: Vector2i) -> void:
 	set_facing(facing)
@@ -72,10 +124,12 @@ func animate_move(target_cell: Vector2i, facing: Vector2i) -> void:
 		return
 		
 	cancel_tweens()
+	_stop_idle()
 		
 	_active_tween = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	_active_tween.tween_property(self, ^"position", target_pos, move_duration)
 	_active_tween.tween_callback(func():
+		_start_idle()
 		move_completed.emit()
 	)
 
@@ -121,14 +175,33 @@ func animate_invalid_bump(facing: Vector2i) -> void:
 	set_facing(facing)
 	if reduced_motion or not is_inside_tree():
 		return
-	if _active_tween and _active_tween.is_valid():
-		_active_tween.kill()
+	cancel_tweens()
+	_stop_idle()
 		
 	var base_pos := Vector2(_current_cell * tile_size) + Vector2(tile_size * 0.5, tile_size * 0.5)
 	var bump_pos := base_pos + Vector2(facing) * 3.0
 	_active_tween = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	_active_tween.tween_property(self, ^"position", bump_pos, 0.04)
 	_active_tween.chain().tween_property(self, ^"position", base_pos, 0.04)
+	_active_tween.tween_callback(func():
+		_start_idle()
+	)
+
+func animate_victory(on_complete: Callable = Callable()) -> void:
+	if reduced_motion or not is_inside_tree():
+		if on_complete.is_valid():
+			on_complete.call()
+		return
+		
+	cancel_tweens()
+	_stop_idle()
+	
+	var base_y: float = position.y
+	_active_tween = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_active_tween.tween_property(self, ^"position:y", base_y - 6.0, 0.14)
+	_active_tween.chain().tween_property(self, ^"position:y", base_y, 0.18).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
+	if on_complete.is_valid():
+		_active_tween.tween_callback(on_complete)
 
 func update_carried_visual(carried_block: Dictionary) -> void:
 	if _carried_sprite == null:

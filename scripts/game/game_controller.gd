@@ -42,12 +42,17 @@ func _ensure_subsystems() -> void:
 		renderer.tile_size = tile_size
 		renderer.reduced_motion = reduced_motion
 		renderer.player_move_completed.connect(_on_player_move_completed)
+		renderer.portal_unlocked.connect(_on_portal_unlocked)
 		add_child(renderer)
 	
 	if audio == null:
 		audio = AudioService.new()
 		audio.name = "AudioService"
 		add_child(audio)
+
+func _on_portal_unlocked() -> void:
+	if audio:
+		audio.play_exit_open()
 
 func load_level_data(dict: Dictionary) -> void:
 	_ensure_subsystems()
@@ -70,7 +75,12 @@ func load_level_data(dict: Dictionary) -> void:
 	model.state_changed.connect(_on_model_state_changed)
 	model.level_completed.connect(_on_model_level_completed)
 	
+	var lvl_id: String = dict.get("id", "")
+	var ch_num: int = 0
+	if lvl_id.begins_with("ch"):
+		ch_num = int(lvl_id.substr(2, 1))
 	if renderer:
+		renderer.apply_chapter_theme(ch_num)
 		renderer.setup_board(initial_state)
 	turn_updated.emit(initial_state.turn_count)
 	state_updated.emit(initial_state)
@@ -220,6 +230,8 @@ func _on_model_state_changed(event: StringName, _message: String) -> void:
 	state_updated.emit(state)
 
 func _on_model_level_completed(turns: int) -> void:
+	if renderer:
+		renderer.animate_victory()
 	level_completed.emit(turns)
 
 func handle_undo() -> void:

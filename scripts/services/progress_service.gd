@@ -11,9 +11,14 @@ static func _get_default_data() -> Dictionary:
 		"unlocked_level": "ch1_01",
 		"completed_levels": {},
 		"settings": {
+			"master_volume": 1.0,
 			"sfx_volume": 1.0,
+			"music_volume": 0.8,
 			"sfx_enabled": true,
-			"reduced_motion": false
+			"music_enabled": true,
+			"reduced_motion": false,
+			"screen_shake": true,
+			"high_contrast": false
 		}
 	}
 

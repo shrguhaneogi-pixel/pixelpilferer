@@ -3,8 +3,10 @@ class_name BoardRenderer extends Node2D
 ## Displays terrain, fragments, sockets, and exits strictly driven by BoardState.
 
 signal player_move_completed
+signal portal_unlocked
 
 @export var tile_size: int = 16
+@export var screen_shake_enabled: bool = true
 @export var reduced_motion: bool = false:
 	set(val):
 		reduced_motion = val
@@ -29,6 +31,7 @@ var camera: PixelCamera
 var terrain_tileset: TileSet
 var socket_tileset: TileSet
 var _last_carried_empty: bool = true
+var _last_portal_open: bool = false
 
 func _ready() -> void:
 	if terrain_tileset == null or socket_tileset == null:
@@ -114,6 +117,19 @@ func _build_scene_tree() -> void:
 	if is_inside_tree():
 		camera.make_current()
 
+func apply_chapter_theme(chapter_num: int) -> void:
+	match chapter_num:
+		1:
+			modulate = Color(1.0, 0.98, 0.94) # The Stolen Street: Warm amber stone
+		2:
+			modulate = Color(0.92, 0.96, 1.05) # The Broken Bridges: Deep skyway oceanic
+		3:
+			modulate = Color(0.98, 0.93, 1.05) # The Forgotten Vault: Obsidian violet
+		4:
+			modulate = Color(1.04, 1.02, 1.05) # The Chromatic Core: Full spectrum radiance
+		_:
+			modulate = Color(1.0, 1.0, 1.0) # Demo / Neutral
+
 func setup_board(state: BoardState) -> void:
 	if terrain_tileset == null or socket_tileset == null:
 		_init_tilesets()
@@ -149,6 +165,7 @@ func setup_board(state: BoardState) -> void:
 		exit_sprite.visible = false
 		
 	_last_carried_empty = not state.is_carrying()
+	_last_portal_open = state.is_all_sockets_satisfied()
 	update_view(state, true)
 
 func update_view(state: BoardState, snap: bool = false) -> void:
@@ -171,11 +188,23 @@ func update_view(state: BoardState, snap: bool = false) -> void:
 			else:
 				floor_layer.erase_cell(pos)
 				
-	# 3. Exit portal open/locked state
-	if state.is_all_sockets_satisfied():
-		exit_sprite.frame = 1
+	# 3. Exit portal open/locked state & event
+	var is_portal_now_open: bool = state.is_all_sockets_satisfied()
+	if is_portal_now_open != _last_portal_open:
+		if is_portal_now_open:
+			exit_sprite.frame = 1
+			if not snap and not reduced_motion and is_inside_tree():
+				_animate_portal_open()
+				trigger_screen_shake(1.5, 0.14)
+			portal_unlocked.emit()
+		else:
+			exit_sprite.frame = 0
+			exit_sprite.scale = Vector2.ONE
+		_last_portal_open = is_portal_now_open
 	else:
-		exit_sprite.frame = 0
+		exit_sprite.frame = 1 if is_portal_now_open else 0
+		if not is_portal_now_open:
+			exit_sprite.scale = Vector2.ONE
 		
 	# 4. Movable Blocks
 	if snap:
@@ -242,6 +271,17 @@ func update_view(state: BoardState, snap: bool = false) -> void:
 			
 	_last_carried_empty = not state.is_carrying()
 
+func _animate_portal_open() -> void:
+	exit_sprite.scale = Vector2(0.6, 0.6)
+	var tw := create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_property(exit_sprite, ^"scale", Vector2(1.2, 1.2), 0.15)
+	tw.chain().tween_property(exit_sprite, ^"scale", Vector2.ONE, 0.12)
+
+func trigger_screen_shake(intensity: float = 1.5, duration: float = 0.12) -> void:
+	if reduced_motion or not screen_shake_enabled or camera == null:
+		return
+	camera.shake(intensity, duration)
+
 func animate_player_move(target_cell: Vector2i, facing: Vector2i) -> void:
 	if player_view:
 		player_view.animate_move(target_cell, facing)
@@ -255,6 +295,10 @@ func snap_player(cell: Vector2i, facing: Vector2i) -> void:
 func animate_invalid_bump(facing: Vector2i) -> void:
 	if player_view:
 		player_view.animate_invalid_bump(facing)
+
+func animate_victory(on_complete: Callable = Callable()) -> void:
+	if player_view:
+		player_view.animate_victory(on_complete)
 
 func kill_all_tweens() -> void:
 	if player_view:

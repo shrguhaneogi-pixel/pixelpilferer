@@ -58,6 +58,7 @@ func get_color_rgb() -> Color:
 func cancel_tweens() -> void:
 	if _active_tween and _active_tween.is_valid():
 		_active_tween.kill()
+	_update_visuals()
 
 func _update_visuals() -> void:
 	if _sprite == null:
@@ -118,10 +119,11 @@ func pulse_socket_activation() -> void:
 	if _active_tween and _active_tween.is_valid():
 		_active_tween.kill()
 		
+	_spawn_particle_burst(false)
 	var base_scale: Vector2 = Vector2(0.9, 0.9) if is_bridge else Vector2(1.0, 1.0)
 	var base_mod: Color = Color(0.85, 0.9, 1.0, 0.9) if is_bridge else Color(1.0, 1.0, 1.0, 1.0)
-	var pulse_scale: Vector2 = base_scale * 1.2
-	var flash_mod: Color = Color(1.6, 1.6, 1.6, 1.0)
+	var pulse_scale: Vector2 = base_scale * 1.25
+	var flash_mod: Color = Color(1.8, 1.8, 1.8, 1.0)
 	
 	if not is_inside_tree():
 		return
@@ -129,8 +131,8 @@ func pulse_socket_activation() -> void:
 	_active_tween = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	_active_tween.tween_property(self, ^"scale", pulse_scale, 0.08)
 	_active_tween.parallel().tween_property(self, ^"modulate", flash_mod, 0.08)
-	_active_tween.chain().tween_property(self, ^"scale", base_scale, 0.12).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-	_active_tween.parallel().tween_property(self, ^"modulate", base_mod, 0.12)
+	_active_tween.chain().tween_property(self, ^"scale", base_scale, 0.14).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	_active_tween.parallel().tween_property(self, ^"modulate", base_mod, 0.14)
 
 func _spawn_particle_burst(inward: bool = false) -> void:
 	if reduced_motion or not is_inside_tree():

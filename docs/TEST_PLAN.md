@@ -145,13 +145,25 @@ Comprehensive test cases verifying the full 20-level campaign curriculum, progre
 
 ---
 
-## 8. Test Runners & Commands
+## 8. Phase 6 Art Direction, Animation, Audio & Settings Verification
+
+Comprehensive test cases verifying the presentation layer, asset dimensions, procedural sound palette, and accessibility controls:
+1. **Sprite Dimensions & Frames:** Verifies `pip.png` (64x16, 4 frames), `blocks.png` (80x16, 5 frames), `tileset.png` (64x16, 4 tiles), `sockets.png` (160x16, 10 frames), `exit_portal.png` (32x16, 2 frames), and `icon.png` (64x64).
+2. **AudioService Sound Palette:** Verifies all 10 sound effect players (`steal`, `place`, `socket`, `step`, `undo`, `win`, `bump`, `exit_open`, `ui_click`, `chapter_restored`) and the ambient music player are initialized.
+3. **Decibel & Volume Invariants:** Asserts `volume_db` properly converts from linear scalar product (`linear_to_db(vol * master)`) and that disabling music attenuates to -80.0 dB.
+4. **PlayerView Animations & Idle State:** Verifies idle breathing state is activated when `reduced_motion = false`, deactivates on `reduced_motion = true`, and snaps cleanly with zero lingering offsets.
+5. **BoardRenderer Theming & Shake:** Asserts chapter themes 1 to 4 adjust color modulation cleanly, portal unlock emits `portal_unlocked` signal, and camera screen shake respects `reduced_motion` and `screen_shake_enabled`.
+6. **Settings Persistence:** Verifies `SettingsMenu` sliders and checkboxes are properly wired to `ProgressService` and persist `master_volume`, `sfx_volume`, `music_volume`, `reduced_motion`, and `screen_shake`.
+
+---
+
+## 9. Test Runners & Commands
 
 ### Headless Godot 4.7.2 Suite
 ```powershell
 & "C:\Users\Dell\AppData\Local\Microsoft\WinGet\Packages\GodotEngine.GodotEngine_Microsoft.Winget.Source_8wekyb3d8bbwe\Godot_v4.7.2-stable_win64_console.exe" --headless --script res://tests/test_runner.gd
 ```
-- Runs **313 assertions** covering resource loading, data structures, invariants, all 28 deterministic tests, demo corridor scenario, 500-step fuzzing, board rendering, player animation & particles, block views, input handling & buffering, HUD upgrades, sequential demo progression, Phase 4 solver & validation tests, and Phase 5 campaign & progression tests.
+- Runs **361 assertions** covering resource loading, data structures, invariants, all 28 deterministic tests, demo corridor scenario, 500-step fuzzing, board rendering, player animation & particles, block views, input handling & buffering, HUD upgrades, sequential demo progression, Phase 4 solver & validation tests, Phase 5 campaign & progression tests, and Phase 6 art, animation, audio, and accessibility tests.
 
 ### Master Headless Runner (Python dual-harness)
 ```powershell

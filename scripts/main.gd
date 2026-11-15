@@ -80,12 +80,23 @@ func _apply_saved_settings() -> void:
 	var progress := ProgressService.load_progress()
 	var s: Dictionary = progress.get("settings", {})
 	if game_controller and game_controller.audio:
+		game_controller.audio.master_volume = s.get("master_volume", 1.0)
 		game_controller.audio.sfx_enabled = s.get("sfx_enabled", true)
 		game_controller.audio.sfx_volume = s.get("sfx_volume", 1.0)
+		game_controller.audio.music_enabled = s.get("music_enabled", true)
+		game_controller.audio.music_volume = s.get("music_volume", 0.8)
+		game_controller.audio.update_music_volume()
+		if game_controller.audio.music_enabled:
+			game_controller.audio.start_music()
+		else:
+			game_controller.audio.stop_music()
 	if game_controller:
-		game_controller.reduced_motion = s.get("reduced_motion", false)
+		var rm: bool = s.get("reduced_motion", false)
+		var ss: bool = s.get("screen_shake", true)
+		game_controller.reduced_motion = rm
 		if game_controller.renderer:
-			game_controller.renderer.reduced_motion = s.get("reduced_motion", false)
+			game_controller.renderer.reduced_motion = rm
+			game_controller.renderer.screen_shake_enabled = ss
 
 func _show_title_screen() -> void:
 	if title_screen: title_screen.visible = true
@@ -174,7 +185,10 @@ func _on_level_completed(turns: int) -> void:
 		next_id = "ch%d_01" % (_current_chapter + 1)
 		
 	ProgressService.record_level_completion(lvl_id, turns, next_id)
-	var is_campaign_ending := (_current_chapter == 4 and _current_level_idx + 1 >= levels.size())
+	var is_chapter_ending := (_current_level_idx + 1 >= levels.size())
+	var is_campaign_ending := (_current_chapter == 4 and is_chapter_ending)
+	if is_chapter_ending and game_controller and game_controller.audio:
+		game_controller.audio.play_chapter_restored()
 	if hud_node:
 		hud_node.show_win(turns, is_campaign_ending, ProgressService.get_total_moves())
 

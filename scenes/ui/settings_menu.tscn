@@ -18,10 +18,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -140.0
-offset_top = -100.0
-offset_right = 140.0
-offset_bottom = 100.0
+offset_left = -160.0
+offset_top = -140.0
+offset_right = 160.0
+offset_bottom = 140.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -31,40 +31,65 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 12.0
-offset_top = 12.0
+offset_top = 8.0
 offset_right = -12.0
-offset_bottom = -12.0
+offset_bottom = -8.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 6
 
 [node name="Title" type="Label" parent="Panel/VBox"]
 layout_mode = 2
-text = "SETTINGS"
+text = "SETTINGS & ACCESSIBILITY"
 horizontal_alignment = 1
 
-[node name="VolumeRow" type="HBoxContainer" parent="Panel/VBox"]
+[node name="SFXVolumeRow" type="HBoxContainer" parent="Panel/VBox"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="Panel/VBox/VolumeRow"]
+[node name="Label" type="Label" parent="Panel/VBox/SFXVolumeRow"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Volume"
+text = "SFX Volume"
 
-[node name="HSlider" type="HSlider" parent="Panel/VBox/VolumeRow"]
-custom_minimum_size = Vector2(100, 0)
+[node name="HSlider" type="HSlider" parent="Panel/VBox/SFXVolumeRow"]
+custom_minimum_size = Vector2(90, 0)
 layout_mode = 2
 value = 100.0
 
-[node name="SFXRow" type="HBoxContainer" parent="Panel/VBox"]
+[node name="SFXEnableRow" type="HBoxContainer" parent="Panel/VBox"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="Panel/VBox/SFXRow"]
+[node name="Label" type="Label" parent="Panel/VBox/SFXEnableRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Enable SFX"
 
-[node name="CheckBox" type="CheckBox" parent="Panel/VBox/SFXRow"]
+[node name="CheckBox" type="CheckBox" parent="Panel/VBox/SFXEnableRow"]
+layout_mode = 2
+button_pressed = true
+
+[node name="MusicVolumeRow" type="HBoxContainer" parent="Panel/VBox"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Panel/VBox/MusicVolumeRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Music Volume"
+
+[node name="HSlider" type="HSlider" parent="Panel/VBox/MusicVolumeRow"]
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+value = 80.0
+
+[node name="MusicEnableRow" type="HBoxContainer" parent="Panel/VBox"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Panel/VBox/MusicEnableRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Enable Music"
+
+[node name="CheckBox" type="CheckBox" parent="Panel/VBox/MusicEnableRow"]
 layout_mode = 2
 button_pressed = true
 
@@ -79,8 +104,20 @@ text = "Reduced Motion"
 [node name="CheckBox" type="CheckBox" parent="Panel/VBox/MotionRow"]
 layout_mode = 2
 
+[node name="ShakeRow" type="HBoxContainer" parent="Panel/VBox"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Panel/VBox/ShakeRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Screen Shake"
+
+[node name="CheckBox" type="CheckBox" parent="Panel/VBox/ShakeRow"]
+layout_mode = 2
+button_pressed = true
+
 [node name="BackBtn" type="Button" parent="Panel/VBox"]
 layout_mode = 2
-text = "Save & Back"
+text = "Save & Close"
 
 [connection signal="pressed" from="Panel/VBox/BackBtn" to="." method="_on_back_pressed"]

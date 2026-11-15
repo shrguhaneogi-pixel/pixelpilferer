@@ -9,7 +9,8 @@
 | **Phase 3** | Playable Vertical Slice | **COMPLETE** | Full board rendering, 120ms smooth movement & particles, WASD + Shift+Dir + E + mouse adjacent clicks, input buffering, carried-block HUD, and 3 authored demo puzzles. |
 | **Phase 4** | Puzzle Solver & Level Validation | **COMPLETE** | BFS & A* solver engine, schema validator, solution replay verifier, and contextual hint generator. |
 | **Phase 5** | Complete Campaign & Puzzle Design | **COMPLETE** | 20 campaign levels across 4 chapters with strict pedagogical curriculum, 100% solver-verified solvability, progression persistence, and restoration victory flow. |
-| **Phase 6** | Polish, Accessibility, Web & Release | **NEXT** | Audio enhancement, UI polish, accessibility settings, and desktop/web release exports. |
+| **Phase 6** | Art Direction, Animation, Audio & Settings | **COMPLETE** | 16x16 pixel sprites (Pip with visor/idle bob, chromatic blocks with tactile runes, chapter-themed palettes, void/bridges), 11 original synthesized WAV retro audio tracks (including 12s ambient BGM), particle glove interactions, accessibility settings (Reduced Motion, Screen Shake, Volume sliders). |
+| **Phase 7** | Platform Export & Final Release | **NEXT** | HTML5 Web single-thread export, Windows desktop package, and release distribution verification. |
 
 ---
 
@@ -53,6 +54,6 @@
 - **Host OS:** Windows 11 (AMD64)
 - **Godot Binary:** Godot 4.7.2 stable official (`Godot_v4.7.2-stable_win64_console.exe`) installed via WinGet.
 - **Python:** Python 3.14.3 utilized for automated dual test harness, level validation, and campaign audit.
-- **Godot Native Test Harness:** `tests/test_runner.gd` executes **313 assertions** (resource loading, data structures, invariants, all 28 deterministic tests, demo corridor scenario, 500-step randomized property fuzzing, board rendering, player animation & particles, block views, input handling & buffering, HUD upgrades, sequential demo progression, Phase 4 solver/validator/hint verification tests, and Phase 5 campaign & progression tests) with 100% success (exit code 0).
+- **Godot Native Test Harness:** `tests/test_runner.gd` executes **361 assertions** (resource loading, data structures, invariants, all 28 deterministic tests, demo corridor scenario, 500-step randomized property fuzzing, board rendering, player animation & particles, block views, input handling & buffering, HUD upgrades, sequential demo progression, Phase 4 solver/validator/hint verification tests, Phase 5 campaign & progression tests, and Phase 6 art, animation, audio, and accessibility tests) with 100% success (exit code 0).
 - **Master Test Runner:** `python tests/run_tests.py` executes 79 deterministic test assertions, the vertical slice demo verification suite, 54 Phase 4 solver & validator assertions, and all 23 levels verified solvable with 100% success (exit code 0).
 - **Campaign Audit:** `python tests/test_campaign_audit.py` formally audits all 20 campaign levels against curriculum invariants, bounds, optimal steps, and solution replay verification. Generated `docs/CAMPAIGN_VALIDATION.md`.
