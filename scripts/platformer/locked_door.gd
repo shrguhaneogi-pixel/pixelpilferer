@@ -4,9 +4,12 @@ signal door_state_changed(is_open: bool)
 
 @export var socket_id: String = ""
 @export var door_size: Vector2 = Vector2(16.0, 32.0)
+@export var sprite_closed_tex: Texture2D = null
+@export var sprite_open_tex: Texture2D = null
 var is_open: bool = false
 
 @onready var collision_shape: CollisionShape2D = get_node_or_null("CollisionShape2D")
+@onready var sprite: Sprite2D = get_node_or_null("Sprite2D")
 
 func _ready() -> void:
 	collision_layer = 2 # Solid Terrain
@@ -17,13 +20,21 @@ func _ready() -> void:
 		box.size = door_size
 		collision_shape.shape = box
 		add_child(collision_shape)
+	if (sprite_closed_tex or sprite_open_tex) and sprite == null:
+		sprite = Sprite2D.new()
+		sprite.name = "Sprite2D"
+		add_child(sprite)
 	set_open(false)
 
 func set_open(open: bool) -> void:
 	is_open = open
 	if collision_shape:
 		collision_shape.set_deferred("disabled", open)
-	visible = not open
+	if sprite:
+		sprite.texture = sprite_open_tex if open else sprite_closed_tex
+		visible = true
+	else:
+		visible = not open
 	door_state_changed.emit(open)
 	queue_redraw()
 
@@ -31,7 +42,7 @@ func reset() -> void:
 	set_open(false)
 
 func _draw() -> void:
-	if is_open:
+	if is_open or sprite != null:
 		return
 	# Barrier visual (energy grid)
 	var half_w: float = door_size.x * 0.5

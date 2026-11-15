@@ -5,15 +5,23 @@ const PlayerPlatformer = preload("res://scripts/platformer/player_platformer.gd"
 signal collected(shard: CollectibleShard)
 
 @export var shard_id: String = ""
+@export var sprite_texture: Texture2D = null
 var is_collected: bool = false
 var base_position: Vector2 = Vector2.ZERO
 var anim_time: float = 0.0
+
+@onready var sprite: Sprite2D = get_node_or_null("Sprite2D")
 
 func _ready() -> void:
 	base_position = position
 	collision_layer = 4
 	collision_mask = 1 # Player is Layer 1
-	body_entered.connect(_on_body_entered)
+	if not body_entered.is_connected(_on_body_entered):
+		body_entered.connect(_on_body_entered)
+	if sprite_texture and sprite == null:
+		sprite = Sprite2D.new()
+		sprite.texture = sprite_texture
+		add_child(sprite)
 
 func _process(delta: float) -> void:
 	if not is_collected:
@@ -41,7 +49,7 @@ func reset() -> void:
 	queue_redraw()
 
 func _draw() -> void:
-	if is_collected:
+	if is_collected or (sprite and sprite.texture):
 		return
 	# Draw diamond pixel shard
 	var diamond_pts = PackedVector2Array([

@@ -12,6 +12,7 @@ var _players: Dictionary = {}
 var _music_player: AudioStreamPlayer
 
 const SFX_MAP = {
+	# Original SFX mappings
 	&"steal": "res://assets/audio/sfx_steal.wav",
 	&"place": "res://assets/audio/sfx_place.wav",
 	&"socket": "res://assets/audio/sfx_socket.wav",
@@ -21,10 +22,24 @@ const SFX_MAP = {
 	&"bump": "res://assets/audio/sfx_bump.wav",
 	&"exit_open": "res://assets/audio/sfx_exit_open.wav",
 	&"ui_click": "res://assets/audio/sfx_ui_click.wav",
-	&"chapter_restored": "res://assets/audio/sfx_chapter_restored.wav"
+	&"chapter_restored": "res://assets/audio/sfx_chapter_restored.wav",
+
+	# Verified Open-Source Asset mappings (Kenney CC0 1.0)
+	&"jump": "res://assets/audio/sfx/sfx_jump.wav",
+	&"hurt": "res://assets/audio/sfx/sfx_hurt.wav",
+	&"bounce": "res://assets/audio/sfx/sfx_bounce.wav",
+	&"pluck": "res://assets/audio/sfx/sfx_pluck.wav",
+	&"land": "res://assets/audio/sfx/sfx_land.wav",
+	&"siphon": "res://assets/audio/sfx/sfx_siphon.wav",
+	&"snapback": "res://assets/audio/sfx/sfx_snapback.wav",
+	&"shard": "res://assets/audio/sfx/sfx_socket.wav",
+	&"checkpoint": "res://assets/audio/sfx/sfx_checkpoint.wav",
+	&"door_open": "res://assets/audio/sfx/sfx_door_open.wav",
+	&"victory": "res://assets/audio/music/music_victory_jingle.mp3"
 }
 
-const MUSIC_PATH = "res://assets/audio/music_ambient.wav"
+const MUSIC_PATH = "res://assets/audio/music/music_world1_loop.mp3"
+const LEGACY_MUSIC_PATH = "res://assets/audio/music_ambient.wav"
 
 func _ready() -> void:
 	_init_sfx_players()
@@ -41,9 +56,10 @@ func _init_sfx_players() -> void:
 			_players[sfx_name] = player
 
 func _init_music_player() -> void:
-	if ResourceLoader.exists(MUSIC_PATH):
+	var stream_path = MUSIC_PATH if ResourceLoader.exists(MUSIC_PATH) else LEGACY_MUSIC_PATH
+	if ResourceLoader.exists(stream_path):
 		_music_player = AudioStreamPlayer.new()
-		_music_player.stream = load(MUSIC_PATH)
+		_music_player.stream = load(stream_path)
 		_music_player.bus = &"Master"
 		_music_player.finished.connect(_on_music_finished)
 		add_child(_music_player)
@@ -51,7 +67,7 @@ func _init_music_player() -> void:
 			start_music()
 
 func _on_music_finished() -> void:
-	# Continuous ambient music loop
+	# Continuous music loop
 	if music_enabled and _music_player:
 		_music_player.play()
 
@@ -64,6 +80,15 @@ func start_music() -> void:
 func stop_music() -> void:
 	if _music_player and _music_player.playing:
 		_music_player.stop()
+
+func play_track(track_path: String) -> void:
+	if not ResourceLoader.exists(track_path):
+		return
+	if _music_player:
+		_music_player.stop()
+		_music_player.stream = load(track_path)
+		if music_enabled:
+			start_music()
 
 func update_music_volume() -> void:
 	if _music_player:
@@ -84,9 +109,12 @@ func play_sfx(sfx_name: StringName) -> void:
 			player.play()
 
 func play_steal() -> void:
-	if _players.has(&"steal"):
-		_players[&"steal"].pitch_scale = randf_range(0.97, 1.03)
-	play_sfx(&"steal")
+	if _players.has(&"siphon"):
+		play_sfx(&"siphon")
+	else:
+		if _players.has(&"steal"):
+			_players[&"steal"].pitch_scale = randf_range(0.97, 1.03)
+		play_sfx(&"steal")
 
 func play_place() -> void:
 	if _players.has(&"place"):
@@ -119,3 +147,14 @@ func play_bump() -> void:
 func play_exit_open() -> void: play_sfx(&"exit_open")
 func play_ui_click() -> void: play_sfx(&"ui_click")
 func play_chapter_restored() -> void: play_sfx(&"chapter_restored")
+
+# Rebound-specific platformer actions
+func play_jump() -> void: play_sfx(&"jump")
+func play_bounce() -> void: play_sfx(&"bounce")
+func play_land() -> void: play_sfx(&"land")
+func play_siphon() -> void: play_sfx(&"siphon")
+func play_snapback() -> void: play_sfx(&"snapback")
+func play_shard() -> void: play_sfx(&"shard")
+func play_checkpoint() -> void: play_sfx(&"checkpoint")
+func play_door_open() -> void: play_sfx(&"door_open")
+func play_victory() -> void: play_sfx(&"victory")

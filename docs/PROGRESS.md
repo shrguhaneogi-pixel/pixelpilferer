@@ -87,4 +87,20 @@
 | **Dual Resource Role** | Spring vs. Socket Anchoring | **COMPLETE** | Fragments placed into sockets enter `ANCHORED` mode (solid puzzle conduits, zero bounce/snapback), creating meaningful resource dilemmas. |
 | **11-Step Vertical Slice** | "Rebound: The Stolen Spring" | **COMPLETE** | Handcrafted test scene `rebound_vertical_slice.tscn` verifying all 11 acceptance steps and 3 critical edge cases (side collision rejection, deferred overlap restoration, socket anchoring) in `test_rebound_vertical_slice.gd` (32/32 PASS). |
 
+---
+
+## 6. Open-Source Asset-First Migration & Mandatory Licensing Audit
+
+| Milestone / Deliverable | Scope | Status | Notes |
+| :--- | :--- | :---: | :--- |
+| **Workspace Skill** | `/open-asset-license-audit` | **COMPLETE** | Authored `.agents/skills/open-asset-license-audit/SKILL.md` enforcing zero-AI mandate, CC0/CC BY licensing hierarchy, SHA-256 verification, and attribution procedures. |
+| **Asset Sourcing & Provenance** | Kenney & Juhani Junkala | **COMPLETE** | Acquired verified human-authored CC0 1.0 assets: Kenney Pixel Platformer (sprites & tilesets), Kenney Interface Sounds (SFX), Kenney Fonts (KenPixel TTF), and Juhani Junkala (Chiptune Adventures BGM). |
+| **Asset Manifest** | `docs/ASSET_MANIFEST.md` | **COMPLETE** | Complete registry of all 57 asset files with author provenance, license type, exact SHA-256 checksums, and approval status. |
+| **Selection Gate Report** | `docs/ASSET_SELECTION_REPORT.md` | **COMPLETE** | Authored formal review document covering candidate shortlists, visual hierarchy, 16x16 pixel uniformity, colorblind rune pairing, audio LUFS mixing, and anti-AI audit evidence. |
+| **Project Credits & In-Game UI** | `CREDITS.md` & `credits_modal.tscn` | **COMPLETE** | Created comprehensive `CREDITS.md` with legal attribution and updated in-game `credits_modal.tscn` with scrollable attribution list and zero-AI guarantee. |
+| **Automated Asset Audit** | `tests/test_asset_audit.py` | **COMPLETE** | Python test suite verifying 100% of assets against manifest, SHA-256 hashes, license whitelist, and attribution compliance (57/57 PASS). |
+| **Showcase Level** | `rebound_showcase_level.tscn` | **COMPLETE** | Built showcase level integrating open sprites, spring mechanics, shards, checkpoint, locked door, and audio stream; verified via `test_showcase_level.gd` (51/51 PASS). |
+| **Master Regression Test** | Full System Validation | **COMPLETE** | All 575 automated assertions passing cleanly (0 failures) across domain model, solver, platformer movement, vertical slices, asset audit, and showcase level. |
+
+
 

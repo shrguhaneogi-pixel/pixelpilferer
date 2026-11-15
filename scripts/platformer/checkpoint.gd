@@ -12,7 +12,8 @@ var is_active: bool = false
 func _ready() -> void:
 	collision_layer = 4
 	collision_mask = 1 # Player is Layer 1
-	body_entered.connect(_on_body_entered)
+	if not body_entered.is_connected(_on_body_entered):
+		body_entered.connect(_on_body_entered)
 	update_visual()
 
 func _on_body_entered(body: Node2D) -> void:

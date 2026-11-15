@@ -18,7 +18,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 0.7)
+color = Color(0, 0, 0, 0.75)
 
 [node name="Panel" type="PanelContainer" parent="."]
 layout_mode = 1
@@ -27,44 +27,70 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -180.0
-offset_top = -120.0
-offset_right = 180.0
-offset_bottom = 120.0
+offset_left = -220.0
+offset_top = -140.0
+offset_right = 220.0
+offset_bottom = 140.0
 grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Margin" type="MarginContainer" parent="Panel"]
 layout_mode = 2
 theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 16
+theme_override_constants/margin_top = 14
 theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 16
+theme_override_constants/margin_bottom = 14
 
 [node name="VBox" type="VBoxContainer" parent="Panel/Margin"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 8
 
 [node name="Title" type="Label" parent="Panel/Margin/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 0.898, 1, 1)
-text = "PIXEL PILFERER — CREDITS"
+text = "PIXEL PILFERER: REBOUND — CREDITS"
 horizontal_alignment = 1
 
-[node name="Content" type="Label" parent="Panel/Margin/VBox"]
+[node name="Scroll" type="ScrollContainer" parent="Panel/Margin/VBox"]
+custom_minimum_size = Vector2(400, 180)
 layout_mode = 2
-text = "A 2D Grid-Based Puzzle Adventure
+size_flags_vertical = 3
 
-Game Direction & Engineering:
-Google DeepMind Antigravity AI Director
+[node name="ScrollContent" type="VBoxContainer" parent="Panel/Margin/VBox/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
 
-Engine: Godot Engine 4.7.2 (GDScript)
-Art & Sound: Original Procedural Synthesis
+[node name="Content" type="Label" parent="Panel/Margin/VBox/Scroll/ScrollContent"]
+layout_mode = 2
+text = "Theme: \"BOUNCE BACK\" (Game Jam)
 
-Concept:
-\"Steal the world. Rebuild your escape.\"
+— VISUAL ARTWORK & TILESETS —
+Character & Environmental Art by Kenney (Kenney Vleugels)
+Pixel Platformer & Interactive Sprites (CC0 1.0 Universal)
+https://kenney.nl
 
-Special Thanks to the Godot & Open-Source Community!"
+— AUDIO DESIGN & SOUND EFFECTS —
+Tactile SFX & Interface Sounds by Kenney (CC0 1.0 Universal)
+https://kenney.nl/assets/interface-sounds
+
+— ORIGINAL CHIPTUNE SOUNDTRACK —
+\"Chiptune Adventures\" by Juhani Junkala (SubspaceAudio)
+Licensed under CC0 1.0 Universal / Public Domain
+https://opengameart.org/content/4-chiptunes-adventure
+
+Level Victory Jingle by celestialghost8 (CC0 1.0 Universal)
+https://opengameart.org/content/victory
+
+— TYPOGRAPHY & FONTS —
+KenPixel & KenPixel Mini by Kenney (CC0 1.0 Universal)
+
+— TECHNOLOGY —
+Engine: Godot Engine 4.7.2 (MIT License)
+
+— ZERO-AI GUARANTEE —
+100% human-created, verified open-source assets.
+Zero generative AI art, sound, or music models used."
 horizontal_alignment = 1
 autowrap_mode = 3
 

@@ -3,6 +3,8 @@ class_name MovableFragment2D extends StaticBody2D
 const PlayerPlatformer = preload("res://scripts/platformer/player_platformer.gd")
 const GhostFrame2D = preload("res://scripts/platformer/ghost_frame_2d.gd")
 const BLOCKS_TEX = preload("res://assets/sprites/blocks.png")
+const SPRING_REST_TEX = preload("res://assets/gameplay/spring_rest.png")
+const SPRING_COMP_TEX = preload("res://assets/gameplay/spring_compressed.png")
 
 enum State {
 	HOME,
@@ -166,6 +168,7 @@ func transition_to(new_state: State) -> bool:
 	return true
 
 func apply_state_visuals() -> void:
+	var lbl = get_node_or_null("Label")
 	match state:
 		State.HOME:
 			visible = true
@@ -177,6 +180,11 @@ func apply_state_visuals() -> void:
 			if ghost_frame:
 				ghost_frame.visible = false
 			is_restoration_deferred = false
+			if sprite:
+				sprite.texture = BLOCKS_TEX
+				sprite.modulate = COLOR_TINTS.get(color, Color.WHITE)
+			if lbl:
+				lbl.visible = true
 
 		State.CARRIED:
 			visible = false
@@ -193,11 +201,21 @@ func apply_state_visuals() -> void:
 				collision_shape.set_deferred("disabled", false)
 			if ghost_frame:
 				ghost_frame.visible = true
+			if sprite:
+				sprite.texture = SPRING_REST_TEX
+				sprite.modulate = Color.WHITE
+			if lbl:
+				lbl.visible = false
 
 		State.TRIGGERED:
 			visible = true
 			if ghost_frame:
 				ghost_frame.visible = true
+			if sprite:
+				sprite.texture = SPRING_COMP_TEX
+				sprite.modulate = Color.WHITE
+			if lbl:
+				lbl.visible = false
 
 		State.RETURNING:
 			visible = true
@@ -205,6 +223,11 @@ func apply_state_visuals() -> void:
 				collision_shape.set_deferred("disabled", true)
 			if ghost_frame:
 				ghost_frame.visible = true
+			if sprite:
+				sprite.texture = BLOCKS_TEX
+				sprite.modulate = COLOR_TINTS.get(color, Color.WHITE)
+			if lbl:
+				lbl.visible = true
 
 		State.ANCHORED:
 			visible = true
@@ -214,6 +237,11 @@ func apply_state_visuals() -> void:
 				collision_shape.set_deferred("disabled", false)
 			if ghost_frame:
 				ghost_frame.visible = true
+			if sprite:
+				sprite.texture = BLOCKS_TEX
+				sprite.modulate = COLOR_TINTS.get(color, Color.WHITE)
+			if lbl:
+				lbl.visible = true
 
 	queue_redraw()
 
