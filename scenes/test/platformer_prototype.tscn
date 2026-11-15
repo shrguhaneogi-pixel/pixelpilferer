@@ -1,0 +1,71 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/platformer/player_platformer.gd" id="1_player"]
+[ext_resource type="Script" path="res://scripts/platformer/platformer_camera.gd" id="2_camera"]
+[ext_resource type="Texture2D" path="res://assets/sprites/pip.png" id="3_pip_tex"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_player"]
+size = Vector2(10, 14)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ground_left"]
+size = Vector2(300, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ground_right"]
+size = Vector2(240, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall"]
+size = Vector2(16, 64)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ledge"]
+size = Vector2(64, 16)
+
+[node name="PlatformerPrototype" type="Node2D"]
+
+[node name="GroundLeft" type="StaticBody2D" parent="."]
+position = Vector2(150, 216)
+collision_layer = 2
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GroundLeft"]
+shape = SubResource("RectangleShape2D_ground_left")
+
+[node name="Wall" type="StaticBody2D" parent="."]
+position = Vector2(280, 168)
+collision_layer = 2
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Wall"]
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="GroundRight" type="StaticBody2D" parent="."]
+position = Vector2(480, 216)
+collision_layer = 2
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GroundRight"]
+shape = SubResource("RectangleShape2D_ground_right")
+
+[node name="Ledge" type="StaticBody2D" parent="."]
+position = Vector2(420, 168)
+collision_layer = 2
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ledge"]
+shape = SubResource("RectangleShape2D_ledge")
+
+[node name="Player" type="CharacterBody2D" parent="."]
+position = Vector2(40, 180)
+collision_layer = 1
+collision_mask = 2
+script = ExtResource("1_player")
+
+[node name="Sprite2D" type="Sprite2D" parent="Player"]
+texture = ExtResource("3_pip_tex")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Player"]
+shape = SubResource("RectangleShape2D_player")
+
+[node name="Camera2D" type="Camera2D" parent="." node_paths=PackedStringArray("target")]
+position = Vector2(40, 180)
+script = ExtResource("2_camera")
+target = NodePath("../Player")

@@ -1,0 +1,115 @@
+[gd_scene load_steps=14 format=3]
+
+[ext_resource type="Script" path="res://scripts/test/broken_crossing_controller.gd" id="1_controller"]
+[ext_resource type="Script" path="res://scripts/platformer/platform_tile_manager.gd" id="2_tile_mgr"]
+[ext_resource type="Script" path="res://scripts/platformer/player_platformer.gd" id="3_player"]
+[ext_resource type="Script" path="res://scripts/platformer/pixel_glove.gd" id="4_glove"]
+[ext_resource type="Script" path="res://scripts/platformer/exit_portal.gd" id="5_exit"]
+[ext_resource type="Script" path="res://scripts/platformer/platformer_camera.gd" id="6_camera"]
+[ext_resource type="Texture2D" path="res://assets/sprites/pip.png" id="7_pip_tex"]
+[ext_resource type="Texture2D" path="res://assets/sprites/blocks.png" id="8_block_tex"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_block"]
+size = Vector2(16, 16)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ground_start"]
+size = Vector2(160, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ledge"]
+size = Vector2(64, 16)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall_upper"]
+size = Vector2(16, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ground_exit"]
+size = Vector2(136, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_exit"]
+size = Vector2(16, 24)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_player"]
+size = Vector2(10, 14)
+
+[node name="BrokenCrossing" type="Node2D" node_paths=PackedStringArray("player", "tile_manager", "exit_portal")]
+script = ExtResource("1_controller")
+player = NodePath("Player")
+tile_manager = NodePath("TileManager")
+exit_portal = NodePath("ExitPortal")
+
+[node name="TileManager" type="Node2D" parent="."]
+script = ExtResource("2_tile_mgr")
+
+[node name="WallBlock" type="StaticBody2D" parent="TileManager"]
+position = Vector2(120, 152)
+collision_layer = 2
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TileManager/WallBlock"]
+shape = SubResource("RectangleShape2D_block")
+
+[node name="Sprite2D" type="Sprite2D" parent="TileManager/WallBlock"]
+texture = ExtResource("8_block_tex")
+modulate = Color(0.23, 0.62, 1, 1)
+
+[node name="GroundStart" type="StaticBody2D" parent="."]
+position = Vector2(80, 216)
+collision_layer = 2
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GroundStart"]
+shape = SubResource("RectangleShape2D_ground_start")
+
+[node name="Ledge" type="StaticBody2D" parent="."]
+position = Vector2(96, 176)
+collision_layer = 2
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ledge"]
+shape = SubResource("RectangleShape2D_ledge")
+
+[node name="WallUpper" type="StaticBody2D" parent="."]
+position = Vector2(120, 128)
+collision_layer = 2
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WallUpper"]
+shape = SubResource("RectangleShape2D_wall_upper")
+
+[node name="GroundExit" type="StaticBody2D" parent="."]
+position = Vector2(292, 216)
+collision_layer = 2
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GroundExit"]
+shape = SubResource("RectangleShape2D_ground_exit")
+
+[node name="ExitPortal" type="Area2D" parent="."]
+position = Vector2(320, 184)
+collision_layer = 4
+collision_mask = 1
+script = ExtResource("5_exit")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ExitPortal"]
+shape = SubResource("RectangleShape2D_exit")
+
+[node name="Player" type="CharacterBody2D" parent="."]
+position = Vector2(32, 193)
+collision_layer = 1
+collision_mask = 2
+script = ExtResource("3_player")
+
+[node name="Sprite2D" type="Sprite2D" parent="Player"]
+texture = ExtResource("7_pip_tex")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Player"]
+shape = SubResource("RectangleShape2D_player")
+
+[node name="PixelGlove" type="Node2D" parent="Player" node_paths=PackedStringArray("player", "tile_manager")]
+script = ExtResource("4_glove")
+player = NodePath("..")
+tile_manager = NodePath("../../TileManager")
+
+[node name="Camera2D" type="Camera2D" parent="." node_paths=PackedStringArray("target")]
+position = Vector2(32, 193)
+script = ExtResource("6_camera")
+target = NodePath("../Player")
