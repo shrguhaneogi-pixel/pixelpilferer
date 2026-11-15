@@ -1,103 +1,99 @@
 {
   "chapter": 4,
   "title": "The Chromatic Core",
-  "palette_theme": "chromatic_core",
+  "palette_theme": "prismatic_core",
+  "intro_text": "The sacred digital heart awaits awakening. Match colored fragments to chromatic sockets and restore full radiance to the world.",
   "levels": [
     {
       "id": "ch4_01",
-      "name": "Neon Spectrum",
-      "hint": "Cyan and Magenta conduits awaken. Deliver each spectral fragment to its twin node.",
-      "width": 9,
-      "height": 5,
+      "name": "Prismatic Intro",
+      "hint": "Colored sockets require exact color resonance. Place the Cyan fragment into the Cyan socket.",
+      "width": 7,
+      "height": 4,
       "layout": [
-        "#########",
-        "#P.1...E#",
-        "#..#3#..#",
-        "#.......#",
-        "#########"
+        "#######",
+        "#P..E.#",
+        "#.1.###",
+        "#######"
       ],
       "blocks": [
-        { "pos": [2, 3], "color": 1 },
-        { "pos": [6, 3], "color": 3 }
+        { "pos": [2, 1], "color": 1 }
       ]
     },
     {
       "id": "ch4_02",
-      "name": "Emerald Gate",
-      "hint": "Emerald fragments resonate at high frequency. Guide both emerald and amber safely.",
-      "width": 9,
-      "height": 6,
+      "name": "Duo Resonators",
+      "hint": "Two sockets with different wavelengths. Deliver Cyan to the Cyan socket and Amber to the Amber socket.",
+      "width": 8,
+      "height": 5,
       "layout": [
-        "#########",
-        "#P.4...E#",
-        "#..#.#..#",
-        "#..2....#",
-        "#.......#",
-        "#########"
+        "########",
+        "#P.1...#",
+        "##.###.#",
+        "#..2..E#",
+        "########"
       ],
       "blocks": [
-        { "pos": [2, 3], "color": 4 },
-        { "pos": [6, 3], "color": 2 }
+        { "pos": [2, 1], "color": 1 },
+        { "pos": [5, 1], "color": 2 }
       ]
     },
     {
       "id": "ch4_03",
-      "name": "The Rainbow Bridge",
-      "hint": "Three colors guard the chasm. Bridge the divide, transfer the payload, and illuminate the core.",
-      "width": 9,
-      "height": 6,
+      "name": "Chromatic Bridge",
+      "hint": "Bridge the gap with the neutral fragment, then deliver the Magenta fragment to its socket.",
+      "width": 8,
+      "height": 4,
       "layout": [
-        "#########",
-        "#P.. ..E#",
-        "#...#...#",
-        "#.. .1..#",
-        "#3..#..4#",
-        "#########"
+        "########",
+        "#P. .E.#",
+        "##.##3##",
+        "########"
       ],
       "blocks": [
-        { "pos": [1, 2], "color": 3 },
-        { "pos": [3, 4], "color": 1 },
-        { "pos": [7, 4], "color": 4 }
+        { "pos": [2, 1], "color": 0 },
+        { "pos": [2, 2], "color": 3 }
       ]
     },
     {
       "id": "ch4_04",
-      "name": "Chromatic Labyrinth",
-      "hint": "Three distinct frequencies must be aligned. Avoid blocking secondary corridors with early placements.",
-      "width": 9,
-      "height": 5,
-      "layout": [
-        "#########",
-        "#P.1...E#",
-        "#..#2#3.#",
-        "#.......#",
-        "#########"
-      ],
-      "blocks": [
-        { "pos": [1, 3], "color": 1 },
-        { "pos": [3, 3], "color": 2 },
-        { "pos": [6, 3], "color": 3 }
-      ]
-    },
-    {
-      "id": "ch4_05",
-      "name": "The Core Chamber",
-      "hint": "The heart of reality. All four chromatic fragments must find their sacred pedestals.",
+      "name": "Triad Conduits",
+      "hint": "Cyan, Amber, and Magenta conduits. Organize the transfer depot to deliver each fragment to its matching socket.",
       "width": 9,
       "height": 6,
       "layout": [
         "#########",
         "#P.1...E#",
-        "#..#2#..#",
-        "#..3#4..#",
-        "#.......#",
+        "##.###.##",
+        "#..2.3.##",
+        "#......##",
         "#########"
       ],
       "blocks": [
-        { "pos": [1, 2], "color": 1 },
-        { "pos": [1, 4], "color": 2 },
-        { "pos": [6, 2], "color": 3 },
-        { "pos": [6, 4], "color": 4 }
+        { "pos": [2, 1], "color": 1 },
+        { "pos": [5, 1], "color": 2 },
+        { "pos": [2, 4], "color": 3 }
+      ]
+    },
+    {
+      "id": "ch4_05",
+      "name": "The Grand Core",
+      "hint": "The master finale. Restore all four spectrum conduits: Cyan, Amber, Magenta, and Emerald. Rebuild your escape and restore the world!",
+      "width": 9,
+      "height": 6,
+      "layout": [
+        "#########",
+        "#P.1.2.E#",
+        "##.###.##",
+        "#..3.4.##",
+        "#......##",
+        "#########"
+      ],
+      "blocks": [
+        { "pos": [2, 1], "color": 1 },
+        { "pos": [4, 1], "color": 2 },
+        { "pos": [2, 4], "color": 3 },
+        { "pos": [4, 4], "color": 4 }
       ]
     }
   ]

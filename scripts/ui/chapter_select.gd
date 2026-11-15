@@ -49,10 +49,12 @@ func _populate_chapters() -> void:
 		return
 	chapter_list.clear()
 	for ch in CHAPTER_DATA:
-		if ch["num"] == 0:
-			chapter_list.add_item("Demo: %s" % ch["title"])
-		else:
-			chapter_list.add_item("Chapter %d: %s" % [ch["num"], ch["title"]])
+		var ch_num: int = ch["num"]
+		var prefix: String = "Demo" if ch_num == 0 else "Chapter %d" % ch_num
+		var status_marker: String = ""
+		if ProgressService.is_chapter_completed(ch_num):
+			status_marker = " ★ [RESTORED]"
+		chapter_list.add_item("%s: %s%s" % [prefix, ch["title"], status_marker])
 	chapter_list.item_selected.connect(_on_chapter_selected)
 
 func _on_chapter_selected(index: int) -> void:
@@ -62,10 +64,14 @@ func _on_chapter_selected(index: int) -> void:
 func _select_chapter(ch_num: int) -> void:
 	_selected_chapter = ch_num
 	if chapter_desc:
+		var desc_text: String = ""
 		for ch in CHAPTER_DATA:
 			if ch["num"] == ch_num:
-				chapter_desc.text = ch["desc"]
+				desc_text = ch["desc"]
 				break
+		if ProgressService.is_chapter_completed(ch_num):
+			desc_text += "\n\n★ " + ProgressService.get_chapter_restoration_text(ch_num)
+		chapter_desc.text = desc_text
 	_populate_levels()
 
 func _populate_levels() -> void:
@@ -85,9 +91,11 @@ func _populate_levels() -> void:
 		var lvl_id: String = lvl.get("id", "")
 		var btn := Button.new()
 		btn.focus_mode = Control.FOCUS_NONE
-		btn.custom_minimum_size = Vector2(110, 32)
+		btn.custom_minimum_size = Vector2(120, 32)
 		
+		var is_unlocked: bool = ProgressService.is_level_unlocked(_selected_chapter, lvl_idx)
 		var is_done: bool = completed.has(lvl_id)
+		
 		var label_str: String = ""
 		if _selected_chapter == 0:
 			label_str = "Demo %d" % (lvl_idx + 1)
@@ -95,9 +103,18 @@ func _populate_levels() -> void:
 			label_str = "Level %d-%d" % [_selected_chapter, lvl_idx + 1]
 			
 		if is_done:
-			label_str += " (%d moves)" % completed[lvl_id]
+			btn.text = "%s ★ (%d)" % [label_str, completed[lvl_id]]
+			btn.modulate = Color(0.9, 1.0, 0.8)
+			btn.disabled = false
+		elif is_unlocked:
+			btn.text = label_str
+			btn.modulate = Color(1.0, 1.0, 1.0)
+			btn.disabled = false
+		else:
+			btn.text = "%s [Locked]" % label_str
+			btn.modulate = Color(0.5, 0.5, 0.5, 0.6)
+			btn.disabled = true
 			
-		btn.text = label_str
 		var captured_ch: int = _selected_chapter
 		var captured_idx: int = lvl_idx
 		btn.pressed.connect(func(): level_selected.emit(captured_ch, captured_idx))

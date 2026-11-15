@@ -174,8 +174,9 @@ func _on_level_completed(turns: int) -> void:
 		next_id = "ch%d_01" % (_current_chapter + 1)
 		
 	ProgressService.record_level_completion(lvl_id, turns, next_id)
+	var is_campaign_ending := (_current_chapter == 4 and _current_level_idx + 1 >= levels.size())
 	if hud_node:
-		hud_node.show_win(turns)
+		hud_node.show_win(turns, is_campaign_ending, ProgressService.get_total_moves())
 
 func _advance_next_level() -> void:
 	var ch_data := LevelRepository.load_chapter(_current_chapter)

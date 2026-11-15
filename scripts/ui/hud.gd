@@ -146,9 +146,12 @@ func hide_hint() -> void:
 	if hint_panel:
 		hint_panel.visible = false
 
-func show_win(turns: int) -> void:
+func show_win(turns: int, is_ending: bool = false, total_moves: int = 0) -> void:
 	if win_modal and win_stats_label:
-		win_stats_label.text = "Exit reached!\nCompleted in %d moves!" % turns
+		if is_ending:
+			win_stats_label.text = "★ THE PIXEL CORE IS RESTORED! ★\n\nFull spectrum radiance returns to the world.\nYou have stolen the blocks and rebuilt your escape.\n\nFinal Level: %d moves | Campaign Total: %d moves\nThank you for playing PIXEL PILFERER!" % [turns, total_moves]
+		else:
+			win_stats_label.text = "Exit reached!\nCompleted in %d moves!" % turns
 		win_modal.visible = true
 
 func hide_win() -> void:

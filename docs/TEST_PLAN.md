@@ -130,16 +130,37 @@ A 500-step random walk test with 10% undo probability asserting 5 physical invar
 
 ---
 
-## 7. Test Runners & Commands
+## 7. Phase 5 Complete Campaign & Progression Verification
+
+Comprehensive test cases verifying the full 20-level campaign curriculum, progression persistence, and restoration victory flow:
+1. **Chapter Level Count:** Verifies Chapters 1 through 4 each contain exactly 5 levels (20 total campaign levels).
+2. **Level Schema Validation:** Validates every level through `LevelValidator` (unique IDs, dimensions, player start, exit, non-overlapping blocks).
+3. **Chapter 1 Invariants:** Asserts Chapter 1 levels (`ch1_01` to `ch1_05`) contain strictly NO VOID and NO SOCKETS before their introduction.
+4. **Chapter 2 Invariants:** Asserts Chapter 2 levels (`ch2_01` to `ch2_05`) contain strictly NO SOCKETS before Chapter 3.
+5. **Chapter 3 Invariants:** Asserts Chapter 3 levels (`ch3_01` to `ch3_05`) contain strictly NO COLORED SOCKETS before Chapter 4.
+6. **Tutorial / Demo Integrity:** Asserts Chapter 0 contains 3 verified tutorial levels.
+7. **Progression Locking & Unlocking:** Asserts `ch1_01` unlocked by default, completing `ch1_01` unlocks `ch1_02`, and completing all 5 levels unlocks Chapter 2.
+8. **Restoration Storytelling:** Asserts chapter completion awards world restoration text ("The Neon Grid Hums to Life", etc.).
+9. **Campaign Completion & Grand Victory:** Asserts campaign completion triggers only after `ch4_05` is finished, bringing up the grand victory modal with total move summary.
+
+---
+
+## 8. Test Runners & Commands
 
 ### Headless Godot 4.7.2 Suite
 ```powershell
 & "C:\Users\Dell\AppData\Local\Microsoft\WinGet\Packages\GodotEngine.GodotEngine_Microsoft.Winget.Source_8wekyb3d8bbwe\Godot_v4.7.2-stable_win64_console.exe" --headless --script res://tests/test_runner.gd
 ```
-- Runs **252 assertions** covering resource loading, data structures, invariants, all 28 deterministic tests, demo corridor scenario, 500-step fuzzing, board rendering, player animation & particles, block views, input handling & buffering, HUD upgrades, sequential demo progression, and the 14 Phase 4 solver & validation tests.
+- Runs **313 assertions** covering resource loading, data structures, invariants, all 28 deterministic tests, demo corridor scenario, 500-step fuzzing, board rendering, player animation & particles, block views, input handling & buffering, HUD upgrades, sequential demo progression, Phase 4 solver & validation tests, and Phase 5 campaign & progression tests.
 
 ### Master Headless Runner (Python dual-harness)
 ```powershell
 python tests/run_tests.py
 ```
-- Runs 79 domain assertions, vertical slice demo verification, 54 Phase 4 solver/validator assertions, and all 23 levels verified solvable with A* search heuristic.
+- Runs 79 domain assertions, vertical slice demo verification, 54 Phase 4 solver/validator assertions, and all 23 levels verified solvable with BFS/A* search heuristic.
+
+### Formal Campaign Audit
+```powershell
+python tests/test_campaign_audit.py
+```
+- Audits all 20 campaign levels against curriculum invariants, bounds, optimal steps, and solution replay verification. Outputs report to `docs/CAMPAIGN_VALIDATION.md`.

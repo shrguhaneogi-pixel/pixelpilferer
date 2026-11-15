@@ -20,6 +20,7 @@ func _init() -> void:
 	_test_phase3_rendering_and_views()
 	_test_phase3_input_and_hud()
 	_test_phase4_solver_and_validation()
+	_test_phase5_campaign_and_progression()
 	
 	print("\n-------------------------------------------")
 	print("Total tests executed: %d | Failed: %d" % [_total_tests, _failed_tests])
@@ -1108,4 +1109,89 @@ func _test_phase4_solver_and_validation() -> void:
 
 	_assert_true(model14.is_completed(), "14. Live model reached completed status")
 	_assert_eq(model14.get_state().player_pos, Vector2i(3, 1), "14. Final player position matches exit")
+
+func _test_phase5_campaign_and_progression() -> void:
+	print("\n=== 9. Verifying Phase 5 Complete Campaign, Curriculum Rules, and Progression ===")
+	
+	# 1. Verify all 4 campaign chapters exist and contain exactly 5 levels each
+	var total_campaign_levels: int = 0
+	for ch_num in range(1, 5):
+		var ch_data := LevelRepository.load_chapter(ch_num)
+		_assert_true(not ch_data.is_empty(), "Chapter %d file loads cleanly" % ch_num)
+		var levels: Array = ch_data.get("levels", [])
+		_assert_eq(levels.size(), 5, "Chapter %d contains exactly 5 levels" % ch_num)
+		total_campaign_levels += levels.size()
+		
+		# Validate every level in chapter
+		for lvl_idx in levels.size():
+			var lvl: Dictionary = levels[lvl_idx]
+			var v_res: Dictionary = LevelValidator.validate_level(lvl)
+			_assert_true(v_res["valid"], "Level %s validation passed: %s" % [lvl.get("id", ""), v_res.get("error", "")])
+			
+			var layout: Array = lvl.get("layout", [])
+			# Curriculum rules check
+			if ch_num == 1:
+				var has_void: bool = false
+				var has_socket: bool = false
+				for row: String in layout:
+					if " " in row: has_void = true
+					for c in "S1234":
+						if c in row: has_socket = true
+				_assert_true(not has_void, "Chapter 1 Level %s strictly contains NO VOID before introduction" % lvl.get("id", ""))
+				_assert_true(not has_socket, "Chapter 1 Level %s strictly contains NO SOCKETS before introduction" % lvl.get("id", ""))
+			elif ch_num == 2:
+				var has_socket: bool = false
+				for row: String in layout:
+					for c in "S1234":
+						if c in row: has_socket = true
+				_assert_true(not has_socket, "Chapter 2 Level %s strictly contains NO SOCKETS before introduction" % lvl.get("id", ""))
+			elif ch_num == 3:
+				var has_colored_socket: bool = false
+				for row: String in layout:
+					for c in "1234":
+						if c in row: has_colored_socket = true
+				_assert_true(not has_colored_socket, "Chapter 3 Level %s strictly contains NO COLORED SOCKETS before Chapter 4" % lvl.get("id", ""))
+
+	_assert_eq(total_campaign_levels, 20, "Total campaign levels count is exactly 20")
+	
+	# Demo levels check
+	var demo_data := LevelRepository.load_chapter(0)
+	var demo_levels: Array = demo_data.get("levels", [])
+	_assert_eq(demo_levels.size(), 3, "Tutorial / Demo contains exactly 3 levels")
+
+	# 2. Progression Service Invariants
+	ProgressService.reset_progress()
+	var t1_unlocked: bool = ProgressService.is_level_unlocked(1, 0)
+	_assert_true(t1_unlocked, "Chapter 1 Level 1 (ch1_01) is unlocked by default")
+	
+	ProgressService.record_level_completion("ch1_01", 5, "ch1_02")
+	_assert_true(ProgressService.is_level_completed("ch1_01"), "ch1_01 recorded as completed")
+	_assert_true(ProgressService.is_level_unlocked(1, 1), "ch1_02 unlocked after completing ch1_01")
+	
+	# Chapter completion and restoration text
+	for i in range(1, 6):
+		ProgressService.record_level_completion("ch1_0%d" % i, 10, "ch1_0%d" % (i + 1) if i < 5 else "ch2_01")
+	_assert_true(ProgressService.is_chapter_completed(1), "Chapter 1 marked completed when all 5 levels done")
+	
+	var r1_text: String = ProgressService.get_chapter_restoration_text(1)
+	_assert_true("Sector 1" in r1_text, "Chapter 1 restoration text valid: %s" % r1_text)
+	
+	var r4_text: String = ProgressService.get_chapter_restoration_text(4)
+	_assert_true("PIXEL CORE IS RESTORED" in r4_text, "Chapter 4 restoration text valid: %s" % r4_text)
+	
+	# Campaign finale detection
+	_assert_true(not ProgressService.is_campaign_completed(), "Campaign not marked completed before ch4_05")
+	ProgressService.record_level_completion("ch4_05", 24)
+	_assert_true(ProgressService.is_campaign_completed(), "Campaign marked completed when ch4_05 is completed")
+	
+	# 3. HUD Ending modal verification
+	var hud_scene: PackedScene = ResourceLoader.load("res://scenes/ui/hud.tscn")
+	var hud: HUD = hud_scene.instantiate()
+	hud._ready()
+	hud.show_win(24, true, 250)
+	_assert_true(hud.win_modal.visible, "Win modal visible upon game ending")
+	_assert_true("THE PIXEL CORE IS RESTORED" in hud.win_stats_label.text, "HUD displays victory celebration text")
+	_assert_true("Final Level: 24 moves" in hud.win_stats_label.text, "HUD displays final moves")
+	hud.queue_free()
+
 

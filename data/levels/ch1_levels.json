@@ -2,94 +2,93 @@
   "chapter": 1,
   "title": "The Stolen Street",
   "palette_theme": "neon_night",
+  "intro_text": "The twilight city has gone dark. Fragmented blocks litter the alleyways. Take up the Pixel Glove to clear a path.",
   "levels": [
     {
       "id": "ch1_01",
-      "name": "First Steps",
-      "hint": "Steal the block from the wall alcove and place it onto the glowing socket.",
+      "name": "The Blocked Alley",
+      "hint": "A heavy fragment obstructs the passage. Siphon it into your glove, then proceed to the exit.",
       "width": 7,
       "height": 5,
       "layout": [
         "#######",
-        "#...#E#",
-        "#P.S..#",
+        "#.....#",
+        "#P...E#",
         "#.....#",
         "#######"
       ],
       "blocks": [
-        { "pos": [3, 1], "color": 0 }
+        { "pos": [3, 2], "color": 0 }
       ]
     },
     {
       "id": "ch1_02",
-      "name": "Alley Shortcut",
-      "hint": "The corridor is blocked. Steal the obstacle to pass through, then place it in the socket.",
+      "name": "The Side Pocket",
+      "hint": "Two fragments block your way, but your glove holds only one. Siphon the first and drop it in the side pocket to reach the second.",
+      "width": 7,
+      "height": 4,
+      "layout": [
+        "#######",
+        "#P...E#",
+        "##.####",
+        "#######"
+      ],
+      "blocks": [
+        { "pos": [2, 1], "color": 0 },
+        { "pos": [4, 1], "color": 0 }
+      ]
+    },
+    {
+      "id": "ch1_03",
+      "name": "Turnabout",
+      "hint": "Choose where to set down your stolen fragment carefully. Placing a block turns it back into a solid obstacle.",
+      "width": 7,
+      "height": 5,
+      "layout": [
+        "#######",
+        "#P#...#",
+        "#.#.#.#",
+        "#...#E#",
+        "#######"
+      ],
+      "blocks": [
+        { "pos": [1, 2], "color": 0 },
+        { "pos": [5, 2], "color": 0 }
+      ]
+    },
+    {
+      "id": "ch1_04",
+      "name": "Squeeze Point",
+      "hint": "A narrow alley forces you to maneuver. Relocate the fragment into a holding niche to squeeze forward.",
       "width": 8,
       "height": 5,
       "layout": [
         "########",
         "#P....E#",
-        "#..#S..#",
-        "#..#...#",
+        "###.####",
+        "#......#",
         "########"
-      ],
-      "blocks": [
-        { "pos": [3, 1], "color": 0 }
-      ]
-    },
-    {
-      "id": "ch1_03",
-      "name": "Void Cross",
-      "hint": "Drop a block into the void to create a bridge, cross over, steal it back from the other side, and activate the socket.",
-      "width": 8,
-      "height": 5,
-      "layout": [
-        "########",
-        "#..#S..#",
-        "#P. ..E#",
-        "#..#...#",
-        "########"
-      ],
-      "blocks": [
-        { "pos": [1, 1], "color": 0 }
-      ]
-    },
-    {
-      "id": "ch1_04",
-      "name": "Alleyway Duality",
-      "hint": "One block paves the way across the abyss; the other unlocks the exit.",
-      "width": 9,
-      "height": 6,
-      "layout": [
-        "#########",
-        "#P.....E#",
-        "#... ...#",
-        "#...#S..#",
-        "#...#...#",
-        "#########"
       ],
       "blocks": [
         { "pos": [2, 1], "color": 0 },
-        { "pos": [1, 3], "color": 0 }
+        { "pos": [4, 1], "color": 0 }
       ]
     },
     {
       "id": "ch1_05",
-      "name": "The Twin Locks",
-      "hint": "Both sockets must be powered simultaneously. Plan your steps to avoid boxing yourself in.",
-      "width": 9,
-      "height": 6,
+      "name": "The Double Gate",
+      "hint": "Two massive blockades seal the exit avenue. Stash each obstacle into its designated alcove to clear the avenue.",
+      "width": 8,
+      "height": 4,
       "layout": [
-        "#########",
-        "#P.S...E#",
-        "#..#.#..#",
-        "#..S....#",
-        "#.......#",
-        "#########"
+        "########",
+        "##.##.##",
+        "#P....E#",
+        "########"
       ],
       "blocks": [
-        { "pos": [2, 3], "color": 0 },
-        { "pos": [6, 3], "color": 0 }
+        { "pos": [3, 2], "color": 0 },
+        { "pos": [4, 2], "color": 0 }
       ]
     }
   ]

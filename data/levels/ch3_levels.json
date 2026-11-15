@@ -2,98 +2,94 @@
   "chapter": 3,
   "title": "The Forgotten Vault",
   "palette_theme": "amber_vault",
+  "intro_text": "Ancient conduits lie dormant beneath the obsidian vault. Power the neutral sockets with fragments to unlock the sealed exit gates.",
   "levels": [
     {
       "id": "ch3_01",
-      "name": "Amber Awakening",
-      "hint": "Ancient mechanisms hum. This golden socket demands an Amber fragment to activate.",
-      "width": 8,
-      "height": 5,
+      "name": "Conduit Awakening",
+      "hint": "The exit portal is sealed. Place a fragment onto the neutral socket to power the conduit and open the gate.",
+      "width": 7,
+      "height": 4,
       "layout": [
-        "########",
-        "#P....E#",
-        "#..#2..#",
-        "#..#...#",
-        "########"
+        "#######",
+        "#P..E.#",
+        "#.S.###",
+        "#######"
       ],
       "blocks": [
-        { "pos": [3, 1], "color": 2 }
+        { "pos": [2, 1], "color": 0 }
       ]
     },
     {
       "id": "ch3_02",
-      "name": "Spectrum Split",
-      "hint": "The Amber socket rejects standard stone. Ensure each block finds its true match.",
+      "name": "The Vault Niche",
+      "hint": "The socket is tucked inside an alcove. Drop the fragment into the socket without trapping yourself in the corner.",
+      "width": 7,
+      "height": 5,
+      "layout": [
+        "#######",
+        "#P...E#",
+        "###.###",
+        "##S.###",
+        "#######"
+      ],
+      "blocks": [
+        { "pos": [2, 1], "color": 0 }
+      ]
+    },
+    {
+      "id": "ch3_03",
+      "name": "Conduit and Chasm",
+      "hint": "Two fragments: one must bridge the void to reach the generator, and one must remain in the socket to keep the exit open.",
+      "width": 8,
+      "height": 5,
+      "layout": [
+        "########",
+        "#P. .#E#",
+        "##.##..#",
+        "#..S...#",
+        "########"
+      ],
+      "blocks": [
+        { "pos": [2, 2], "color": 0 },
+        { "pos": [6, 2], "color": 0 }
+      ]
+    },
+    {
+      "id": "ch3_04",
+      "name": "Dual Conduits",
+      "hint": "Both sockets must remain active simultaneously. Place both fragments into their sockets and proceed to the portal.",
       "width": 9,
       "height": 5,
       "layout": [
         "#########",
         "#P.S...E#",
-        "#..#2#..#",
-        "#.......#",
+        "##.###.##",
+        "#..S...##",
         "#########"
       ],
       "blocks": [
-        { "pos": [2, 3], "color": 0 },
-        { "pos": [6, 3], "color": 2 }
-      ]
-    },
-    {
-      "id": "ch3_03",
-      "name": "Tight Quarter Exchange",
-      "hint": "In close confines, blocks can easily become immovable barriers. Think two steps ahead.",
-      "width": 9,
-      "height": 6,
-      "layout": [
-        "#########",
-        "#P.2...E#",
-        "#..#.#..#",
-        "#..2....#",
-        "#.......#",
-        "#########"
-      ],
-      "blocks": [
-        { "pos": [2, 3], "color": 2 },
-        { "pos": [6, 3], "color": 2 }
-      ]
-    },
-    {
-      "id": "ch3_04",
-      "name": "The Vault Siphon",
-      "hint": "Use the spare fragment to construct a pathway to reach the sealed inner conduit.",
-      "width": 9,
-      "height": 6,
-      "layout": [
-        "#########",
-        "#P.. ..E#",
-        "#...#...#",
-        "#.. .2..#",
-        "#...#...#",
-        "#########"
-      ],
-      "blocks": [
-        { "pos": [1, 2], "color": 0 },
-        { "pos": [3, 4], "color": 2 }
+        { "pos": [2, 1], "color": 0 },
+        { "pos": [5, 1], "color": 0 }
       ]
     },
     {
       "id": "ch3_05",
-      "name": "The Triad Conduit",
-      "hint": "Three energy nodes guard the chamber exit. Harmonize the amber conduits with precision.",
-      "width": 10,
+      "name": "Vault Masterwork",
+      "hint": "A master arrangement combining two sockets, a void chasm, and three fragments. Power all circuits and cross to freedom.",
+      "width": 9,
       "height": 6,
       "layout": [
-        "##########",
-        "#P... ..E#",
-        "#.#..#2..#",
-        "#... .#..#",
-        "#..#..S..#",
-        "##########"
+        "#########",
+        "#P. .S.E#",
+        "##.###.##",
+        "#..S...##",
+        "#......##",
+        "#########"
       ],
       "blocks": [
-        { "pos": [2, 1], "color": 2 },
-        { "pos": [1, 3], "color": 0 },
-        { "pos": [6, 1], "color": 2 }
+        { "pos": [2, 1], "color": 0 },
+        { "pos": [5, 3], "color": 0 }
       ]
     }
   ]
